@@ -1,0 +1,37 @@
+# Core PDF Processing
+PyPDF2>=3.0.0
+pdfplumber>=0.10.0
+pypdfium2>=4.0.0  # Advanced PDF rendering and text extraction
+camelot-py[cv]>=0.11.0  # Table extraction from PDFs
+tabula-py>=2.5.0  # Alternative table extraction
+
+# OCR and Character Recognition
+pytesseract>=0.3.10  # OCR for scanned PDFs
+pdf2image>=1.16.0  # Convert PDF pages to images for OCR
+easyocr>=1.7.0  # Alternative OCR engine
+
+# Data Processing
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# Text Processing
+nltk>=3.8.0
+spacy>=3.5.0  # Advanced NLP processing
+textract>=1.6.5  # Extract text from various file formats
+chardet>=5.0.0  # Character encoding detection
+
+# Excel Formatting
+XlsxWriter>=3.1.0
+
+# AI Integration
+anthropic>=0.18.0
+
+# GUI Framework
+PyQt5>=5.15.0
+
+# Build Tools
+pyinstaller>=5.0.0
+auto-py-to-exe>=2.0.0
+
+# Standard Library Extensions
+python-dateutil>=2.8.0

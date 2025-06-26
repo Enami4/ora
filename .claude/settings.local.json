@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(pip install:*)",
+      "Bash(python3 -m pip install:*)",
+      "Bash(python:*)",
+      "Bash(ls:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(./OraEnv/Scripts/python.exe -m py_compile regulatory_processor/validators.py)",
+      "Bash(./OraEnv/Scripts/python.exe test_processing.py)",
+      "Bash(touch:*)",
+      "Bash(./OraEnv/Scripts/pip.exe install chardet pypdfium2 pdf2image pytesseract easyocr tabula-py spacy textract)",
+      "Bash(./OraEnv/Scripts/python.exe -c \"import pytesseract; print('pytesseract module: OK'); print('Version:', pytesseract.get_tesseract_version())\")",
+      "Bash(./OraEnv/Scripts/python.exe -c \"from regulatory_processor import RegulatoryDocumentProcessor; print('Import OK - Application ready!')\")",
+      "Bash(./OraEnv/Scripts/python.exe -c \"from regulatory_processor import RegulatoryDocumentProcessor; print('Application ready!')\")"
+    ],
+    "deny": []
+  }
+}

@@ -1,0 +1,9 @@
+Processing Errors Report
+Generated: 2025-06-26T21:53:34.644377
+Total Errors: 1
+================================================================================
+
+File: C:\Users\doupa\Desktop\Ventures\Orabank\Instruction_COBAC\cbI-99_02.pdf
+Error: 'AIValidator' object has no attribute '_extract_articles_by_sections'
+Timestamp: 2025-06-26T21:53:34.259484
+----------------------------------------
