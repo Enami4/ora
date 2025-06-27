@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class BaseExcelExporter:
+class BaseExcelExporter:1
     """Base class for Excel exporters with common functionality."""
     
     def __init__(self, max_cell_length: int = 32767):

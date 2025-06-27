@@ -8182,3 +8182,12 @@ AttributeError: 'AIValidator' object has no attribute '_extract_articles_by_sect
 2025-06-26 21:53:34,502 - regulatory_processor.exporters - INFO - Exporting summary...
 2025-06-26 21:53:34,507 - regulatory_processor.exporters - INFO - Formatting workbook...
 2025-06-26 21:53:34,645 - regulatory_processor.processor - INFO - Error report saved to: C:\Users\doupa\Desktop\Ventures\Orabank\resultat\analyse_reglementaire_Doupamby_Nyamat_20250626_215331_errors.txt
+2025-06-27 10:58:18,501 - regulatory_processor.extractors - INFO - PDFExtractor initialized with 4 extraction methods
+2025-06-27 10:58:18,508 - regulatory_processor.processor - INFO - Starting processing: Reglement_COBAC/R-2001_03.pdf
+2025-06-27 10:58:18,525 - regulatory_processor.extractors - INFO - Standard extraction methods failed or returned poor results. Attempting OCR extraction...
+2025-06-27 10:58:18,557 - ocr_engine - INFO - Tesseract found at: C:\Users\doupa\AppData\Local\Programs\Tesseract-OCR\tesseract.exe
+2025-06-27 10:58:18,557 - regulatory_processor.extractors - INFO - Using advanced OCR engine for extraction
+2025-06-27 10:58:18,557 - ocr_engine - INFO - Starting advanced OCR extraction for: Reglement_COBAC/R-2001_03.pdf
+2025-06-27 10:58:18,649 - regulatory_processor.extractors - ERROR - OCR extraction also failed: Unable to get page count. Is poppler installed and in PATH?
+2025-06-27 10:58:18,649 - regulatory_processor.extractors - ERROR - All extraction methods failed for Reglement_COBAC/R-2001_03.pdf
+2025-06-27 10:58:18,649 - regulatory_processor.processor - WARNING - No valid text extracted from Reglement_COBAC/R-2001_03.pdf

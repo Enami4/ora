@@ -16,7 +16,10 @@
       "Bash(./OraEnv/Scripts/pip.exe install chardet pypdfium2 pdf2image pytesseract easyocr tabula-py spacy textract)",
       "Bash(./OraEnv/Scripts/python.exe -c \"import pytesseract; print('pytesseract module: OK'); print('Version:', pytesseract.get_tesseract_version())\")",
       "Bash(./OraEnv/Scripts/python.exe -c \"from regulatory_processor import RegulatoryDocumentProcessor; print('Import OK - Application ready!')\")",
-      "Bash(./OraEnv/Scripts/python.exe -c \"from regulatory_processor import RegulatoryDocumentProcessor; print('Application ready!')\")"
+      "Bash(./OraEnv/Scripts/python.exe -c \"from regulatory_processor import RegulatoryDocumentProcessor; print('Application ready!')\")",
+      "Bash(./OraEnv/Scripts/python.exe ocr_engine.py)",
+      "Bash(./OraEnv/Scripts/python.exe -c \"from regulatory_processor.extractors import PDFExtractor; ext = PDFExtractor(); print(f'OCR Available: {ext.extraction_methods[-1].__name__ == \\\"_extract_with_ocr\\\" if ext.extraction_methods else False}')\")",
+      "Bash(./OraEnv/Scripts/python.exe test_ocr_functionality.py)"
     ],
     "deny": []
   }

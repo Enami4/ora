@@ -21,6 +21,10 @@ except ImportError:
 try:
     import pytesseract
     from pdf2image import convert_from_path
+    # Configure Tesseract path
+    tesseract_path = r"C:\Users\doupa\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
+    if os.path.exists(tesseract_path):
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
     # Check if Tesseract executable is available
     try:
         pytesseract.get_tesseract_version()
@@ -67,7 +71,7 @@ class PDFExtractor:
     
     def extract_text(self, pdf_path: str) -> Tuple[str, Dict[int, str]]:
         """
-        Extract text from PDF using multiple methods.
+        Extract text from PDF using multiple methods with intelligent fallback.
         
         Args:
             pdf_path: Path to the PDF file
@@ -81,20 +85,124 @@ class PDFExtractor:
         full_text = ""
         page_texts = {}
         
+        # Try standard extraction methods first
         for method in self.extraction_methods:
+            if method.__name__ == '_extract_with_ocr':
+                continue  # Skip OCR in first pass
+                
             try:
                 full_text, page_texts = method(pdf_path)
-                if full_text.strip():
+                if full_text.strip() and self.validate_extraction(full_text):
                     logger.info(f"Successfully extracted text using {method.__name__}")
-                    break
+                    
+                    # Check if we should enhance with OCR for missing pages
+                    if HAS_OCR and self._should_enhance_with_ocr(full_text, page_texts):
+                        logger.info("Enhancing extraction with OCR for potentially missing content")
+                        ocr_full_text, ocr_page_texts = self._extract_with_ocr(pdf_path)
+                        full_text, page_texts = self._merge_extractions(
+                            full_text, page_texts, ocr_full_text, ocr_page_texts
+                        )
+                    
+                    return full_text, page_texts
             except Exception as e:
                 logger.warning(f"Extraction method {method.__name__} failed: {e}")
                 continue
+        
+        # If all standard methods failed or returned poor results, try OCR
+        if HAS_OCR and '_extract_with_ocr' in [m.__name__ for m in self.extraction_methods]:
+            logger.info("Standard extraction methods failed or returned poor results. Attempting OCR extraction...")
+            try:
+                full_text, page_texts = self._extract_with_ocr(pdf_path)
+                if full_text.strip():
+                    logger.info("Successfully extracted text using OCR")
+                    return full_text, page_texts
+            except Exception as e:
+                logger.error(f"OCR extraction also failed: {e}")
         
         if not full_text.strip():
             logger.error(f"All extraction methods failed for {pdf_path}")
         
         return full_text, page_texts
+    
+    def _should_enhance_with_ocr(self, text: str, page_texts: Dict[int, str]) -> bool:
+        """Determine if OCR enhancement would be beneficial."""
+        # Check for signs that OCR might help
+        
+        # Very short text might indicate poor extraction
+        if len(text) < 500:
+            return True
+        
+        # Check for missing pages (gaps in page numbers)
+        if page_texts:
+            page_numbers = sorted(page_texts.keys())
+            expected_pages = set(range(1, max(page_numbers) + 1))
+            if len(expected_pages - set(page_numbers)) > 0:
+                return True
+        
+        # Check for signs of poor extraction (too many special characters)
+        special_char_ratio = len([c for c in text if not c.isalnum() and c not in ' .,;:!?\n']) / len(text)
+        if special_char_ratio > 0.2:
+            return True
+        
+        return False
+    
+    def _merge_extractions(self, text1: str, pages1: Dict[int, str], 
+                          text2: str, pages2: Dict[int, str]) -> Tuple[str, Dict[int, str]]:
+        """Merge two extraction results, preferring the better quality text."""
+        merged_pages = {}
+        
+        # Merge page by page
+        all_page_nums = set(pages1.keys()) | set(pages2.keys())
+        
+        for page_num in sorted(all_page_nums):
+            page1_text = pages1.get(page_num, "")
+            page2_text = pages2.get(page_num, "")
+            
+            # Choose the better quality text
+            if len(page1_text) > len(page2_text) * 1.5:
+                merged_pages[page_num] = page1_text
+            elif len(page2_text) > len(page1_text) * 1.5:
+                merged_pages[page_num] = page2_text
+            else:
+                # Similar length, choose based on quality indicators
+                if self._text_quality_score(page1_text) >= self._text_quality_score(page2_text):
+                    merged_pages[page_num] = page1_text
+                else:
+                    merged_pages[page_num] = page2_text
+        
+        # Reconstruct full text
+        merged_text = "\n\n".join(merged_pages[p] for p in sorted(merged_pages.keys()))
+        
+        return merged_text, merged_pages
+    
+    def _text_quality_score(self, text: str) -> float:
+        """Calculate a simple quality score for extracted text."""
+        if not text:
+            return 0.0
+        
+        # Factors that indicate good quality
+        score = 0.0
+        
+        # Word count
+        words = text.split()
+        if len(words) > 10:
+            score += 0.3
+        
+        # Alphanumeric ratio
+        alnum_ratio = len([c for c in text if c.isalnum()]) / len(text)
+        score += alnum_ratio * 0.3
+        
+        # Presence of article indicators
+        if any(marker in text.lower() for marker in ['article', 'règlement', 'chapitre']):
+            score += 0.2
+        
+        # Reasonable line length
+        lines = text.split('\n')
+        avg_line_length = sum(len(line) for line in lines) / max(len(lines), 1)
+        if 20 < avg_line_length < 100:
+            score += 0.2
+        
+        return min(score, 1.0)
     
     def _extract_with_pdfplumber(self, pdf_path: str) -> Tuple[str, Dict[int, str]]:
         """Extract text using pdfplumber."""
@@ -217,22 +325,111 @@ class PDFExtractor:
         return full_text.strip(), page_texts
     
     def _extract_with_ocr(self, pdf_path: str) -> Tuple[str, Dict[int, str]]:
-        """Extract text using OCR for scanned PDFs."""
+        """Extract text using OCR for scanned PDFs with advanced processing."""
+        # Try to use the advanced OCR engine if available
+        try:
+            from ocr_engine import AdvancedOCREngine
+            engine = AdvancedOCREngine()
+            if engine.is_available():
+                logger.info("Using advanced OCR engine for extraction")
+                full_text, page_texts, metadata = engine.extract_text_from_pdf(pdf_path, enhancement_level='high')
+                return full_text, page_texts
+        except ImportError:
+            logger.info("Advanced OCR engine not available, using basic OCR")
+        
+        # Fallback to basic OCR
         full_text = ""
         page_texts = {}
         
-        # Convert PDF to images
-        images = convert_from_path(pdf_path, dpi=300)
+        # Convert PDF to images with high quality
+        logger.info(f"Converting PDF to images for OCR: {pdf_path}")
+        
+        # Try to use poppler if available, otherwise use pypdfium2
+        try:
+            images = convert_from_path(pdf_path, dpi=300, fmt='PNG')
+        except Exception as e:
+            logger.warning(f"pdf2image failed (Poppler not installed?): {e}")
+            logger.info("Falling back to pypdfium2 for PDF to image conversion")
+            
+            # Use pypdfium2 as fallback
+            if HAS_PDFIUM:
+                import pypdfium2 as pdfium
+                pdf = pdfium.PdfDocument(pdf_path)
+                images = []
+                for i in range(len(pdf)):
+                    page = pdf[i]
+                    pil_image = page.render(scale=300/72).to_pil()  # 300 DPI
+                    images.append(pil_image)
+                    page.close()
+                pdf.close()
+            else:
+                logger.error("Neither Poppler nor pypdfium2 available for PDF to image conversion")
+                return "", {}
+        
+        # Configure OCR for French regulatory documents
+        custom_config = r'--oem 3 --psm 6 -c preserve_interword_spaces=1'
         
         for i, image in enumerate(images):
-            # Perform OCR on each page
-            page_text = pytesseract.image_to_string(image, lang='fra')  # French language
+            logger.info(f"Processing page {i+1}/{len(images)} with OCR")
             
-            if page_text.strip():
-                page_texts[i + 1] = page_text
-                full_text += page_text + "\n\n"
+            # Enhance image for better OCR (basic preprocessing)
+            from PIL import ImageEnhance, ImageFilter
+            
+            # Convert to grayscale
+            image = image.convert('L')
+            
+            # Enhance contrast
+            enhancer = ImageEnhance.Contrast(image)
+            image = enhancer.enhance(1.5)
+            
+            # Reduce noise
+            image = image.filter(ImageFilter.MedianFilter(size=3))
+            
+            # Perform OCR with both French and English for better accuracy
+            try:
+                page_text = pytesseract.image_to_string(
+                    image, 
+                    lang='fra+eng',  # French + English
+                    config=custom_config
+                )
+                
+                if page_text.strip():
+                    # Post-process the text
+                    page_text = self._post_process_ocr_text(page_text)
+                    page_texts[i + 1] = page_text
+                    full_text += f"\n--- PAGE {i+1} ---\n{page_text}\n\n"
+                else:
+                    logger.warning(f"No text extracted from page {i+1}")
+            except Exception as e:
+                logger.error(f"OCR failed for page {i+1}: {e}")
         
+        logger.info(f"OCR extraction completed. Extracted {len(page_texts)} pages with text.")
         return full_text.strip(), page_texts
+    
+    def _post_process_ocr_text(self, text: str) -> str:
+        """Post-process OCR text to fix common errors."""
+        import re
+        
+        # Fix common OCR errors in French regulatory documents
+        replacements = {
+            r'\bl\b': '1',  # Lowercase l mistaken for 1
+            r'\bO\b': '0',  # Letter O mistaken for 0
+            r'(\d),(\d)': r'\1.\2',  # French decimal separator
+            r'\s+': ' ',  # Multiple spaces to single
+            r'([.!?])([A-Z])': r'\1 \2',  # Missing space after punctuation
+            r'AIT\.': 'ART.',  # Common misrecognition
+            r'Aiticle': 'Article',
+            r'aiticle': 'article',
+        }
+        
+        processed = text
+        for pattern, replacement in replacements.items():
+            processed = re.sub(pattern, replacement, processed)
+        
+        # Clean up excessive newlines
+        processed = re.sub(r'\n\s*\n\s*\n', '\n\n', processed)
+        
+        return processed.strip()
     
     def detect_encoding(self, pdf_path: str) -> str:
         """Detect the character encoding of the PDF."""
