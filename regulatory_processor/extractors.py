@@ -10,6 +10,8 @@ import PyPDF2
 import pdfplumber
 from pathlib import Path
 import chardet
+from .caching import cache_result, get_cache
+from .error_recovery import with_retry, with_fallback, get_error_manager
 
 # Optional advanced extraction libraries
 try:
@@ -69,6 +71,8 @@ class PDFExtractor:
             
         logger.info(f"PDFExtractor initialized with {len(self.extraction_methods)} extraction methods")
     
+    @cache_result("text_extraction", ttl_hours=48)
+    @with_retry(max_retries=2, base_delay=1.0, retry_exceptions=(OSError, PermissionError))
     def extract_text(self, pdf_path: str) -> Tuple[str, Dict[int, str]]:
         """
         Extract text from PDF using multiple methods with intelligent fallback.
@@ -81,6 +85,11 @@ class PDFExtractor:
         """
         if not os.path.exists(pdf_path):
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
+        
+        error_manager = get_error_manager()
+        
+        # Try to get from cache first (handled by decorator)
+        # If not cached, proceed with extraction
         
         full_text = ""
         page_texts = {}
@@ -98,13 +107,19 @@ class PDFExtractor:
                     # Check if we should enhance with OCR for missing pages
                     if HAS_OCR and self._should_enhance_with_ocr(full_text, page_texts):
                         logger.info("Enhancing extraction with OCR for potentially missing content")
-                        ocr_full_text, ocr_page_texts = self._extract_with_ocr(pdf_path)
-                        full_text, page_texts = self._merge_extractions(
-                            full_text, page_texts, ocr_full_text, ocr_page_texts
-                        )
+                        try:
+                            ocr_full_text, ocr_page_texts = self._extract_with_ocr_safe(pdf_path)
+                            if ocr_full_text:
+                                full_text, page_texts = self._merge_extractions(
+                                    full_text, page_texts, ocr_full_text, ocr_page_texts
+                                )
+                        except Exception as ocr_error:
+                            logger.warning(f"OCR enhancement failed: {ocr_error}")
+                            # Continue with standard extraction
                     
                     return full_text, page_texts
             except Exception as e:
+                error_manager._record_error(e, method.__name__, pdf_path)
                 logger.warning(f"Extraction method {method.__name__} failed: {e}")
                 continue
         
@@ -112,39 +127,100 @@ class PDFExtractor:
         if HAS_OCR and '_extract_with_ocr' in [m.__name__ for m in self.extraction_methods]:
             logger.info("Standard extraction methods failed or returned poor results. Attempting OCR extraction...")
             try:
-                full_text, page_texts = self._extract_with_ocr(pdf_path)
+                full_text, page_texts = self._extract_with_ocr_safe(pdf_path)
                 if full_text.strip():
                     logger.info("Successfully extracted text using OCR")
                     return full_text, page_texts
             except Exception as e:
+                error_manager._record_error(e, "extract_with_ocr", pdf_path)
                 logger.error(f"OCR extraction also failed: {e}")
         
         if not full_text.strip():
             logger.error(f"All extraction methods failed for {pdf_path}")
+            # Return empty results instead of failing completely
+            return "", {}
         
         return full_text, page_texts
     
     def _should_enhance_with_ocr(self, text: str, page_texts: Dict[int, str]) -> bool:
         """Determine if OCR enhancement would be beneficial."""
-        # Check for signs that OCR might help
+        # Get text density (chars per page)
+        num_pages = len(page_texts) if page_texts else 1
+        text_density = len(text) / num_pages
+        
+        # If text density is very low, likely scanned document
+        if text_density < 100:
+            logger.info(f"Low text density ({text_density:.1f} chars/page), document likely scanned")
+            return True
         
         # Very short text might indicate poor extraction
         if len(text) < 500:
+            logger.info(f"Very short text ({len(text)} chars), considering OCR enhancement")
             return True
         
         # Check for missing pages (gaps in page numbers)
         if page_texts:
             page_numbers = sorted(page_texts.keys())
             expected_pages = set(range(1, max(page_numbers) + 1))
-            if len(expected_pages - set(page_numbers)) > 0:
+            missing_pages = expected_pages - set(page_numbers)
+            if missing_pages:
+                logger.info(f"Missing pages detected: {missing_pages}, considering OCR enhancement")
                 return True
         
         # Check for signs of poor extraction (too many special characters)
-        special_char_ratio = len([c for c in text if not c.isalnum() and c not in ' .,;:!?\n']) / len(text)
-        if special_char_ratio > 0.2:
+        if text:
+            special_char_ratio = len([c for c in text if not c.isalnum() and c not in ' .,;:!?\n']) / len(text)
+            if special_char_ratio > 0.3:
+                logger.info(f"High special char ratio ({special_char_ratio:.2f}), considering OCR enhancement")
+                return True
+        
+        # Check for extraction quality indicators
+        quality_score = self._calculate_extraction_quality(text)
+        if quality_score < 0.6:
+            logger.info(f"Low extraction quality score ({quality_score:.2f}), considering OCR enhancement")
             return True
         
         return False
+    
+    def _calculate_extraction_quality(self, text: str) -> float:
+        """Calculate extraction quality score (0.0 to 1.0)."""
+        if not text:
+            return 0.0
+        
+        score = 0.0
+        
+        # Word count factor
+        words = text.split()
+        if len(words) > 50:
+            score += 0.3
+        elif len(words) > 20:
+            score += 0.2
+        elif len(words) > 10:
+            score += 0.1
+        
+        # Alphanumeric ratio
+        alnum_chars = sum(1 for c in text if c.isalnum())
+        if text:
+            alnum_ratio = alnum_chars / len(text)
+            score += min(alnum_ratio * 0.4, 0.4)
+        
+        # Sentence structure (periods, punctuation)
+        sentences = text.count('.') + text.count('!') + text.count('?')
+        if sentences > 5:
+            score += 0.2
+        elif sentences > 2:
+            score += 0.1
+        
+        # Legal/regulatory content indicators
+        legal_indicators = [
+            'article', 'règlement', 'instruction', 'cobac', 'cemac',
+            'chapitre', 'section', 'titre', 'commission', 'bancaire'
+        ]
+        found_indicators = sum(1 for indicator in legal_indicators if indicator in text.lower())
+        if found_indicators >= 3:
+            score += 0.1
+        
+        return min(score, 1.0)
     
     def _merge_extractions(self, text1: str, pages1: Dict[int, str], 
                           text2: str, pages2: Dict[int, str]) -> Tuple[str, Dict[int, str]]:
@@ -204,32 +280,50 @@ class PDFExtractor:
         
         return min(score, 1.0)
     
+    @with_retry(max_retries=2, retry_exceptions=(OSError,))
     def _extract_with_pdfplumber(self, pdf_path: str) -> Tuple[str, Dict[int, str]]:
         """Extract text using pdfplumber."""
         full_text = ""
         page_texts = {}
         
-        with pdfplumber.open(pdf_path) as pdf:
-            for i, page in enumerate(pdf.pages):
-                page_text = page.extract_text()
-                if page_text:
-                    page_texts[i + 1] = page_text
-                    full_text += page_text + "\n\n"
+        try:
+            with pdfplumber.open(pdf_path) as pdf:
+                for i, page in enumerate(pdf.pages):
+                    try:
+                        page_text = page.extract_text()
+                        if page_text:
+                            page_texts[i + 1] = page_text
+                            full_text += page_text + "\n\n"
+                    except Exception as e:
+                        logger.warning(f"Failed to extract text from page {i+1}: {e}")
+                        continue
+        except Exception as e:
+            logger.error(f"pdfplumber extraction failed: {e}")
+            raise
         
         return full_text.strip(), page_texts
     
+    @with_retry(max_retries=2, retry_exceptions=(OSError,))
     def _extract_with_pypdf2(self, pdf_path: str) -> Tuple[str, Dict[int, str]]:
         """Extract text using PyPDF2."""
         full_text = ""
         page_texts = {}
         
-        with open(pdf_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
-            for i, page in enumerate(pdf_reader.pages):
-                page_text = page.extract_text()
-                if page_text:
-                    page_texts[i + 1] = page_text
-                    full_text += page_text + "\n\n"
+        try:
+            with open(pdf_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                for i, page in enumerate(pdf_reader.pages):
+                    try:
+                        page_text = page.extract_text()
+                        if page_text:
+                            page_texts[i + 1] = page_text
+                            full_text += page_text + "\n\n"
+                    except Exception as e:
+                        logger.warning(f"Failed to extract text from page {i+1} with PyPDF2: {e}")
+                        continue
+        except Exception as e:
+            logger.error(f"PyPDF2 extraction failed: {e}")
+            raise
         
         return full_text.strip(), page_texts
     
@@ -285,7 +379,7 @@ class PDFExtractor:
     
     def validate_extraction(self, text: str, min_length: int = 100) -> bool:
         """
-        Validate that extracted text meets minimum requirements.
+        Validate extracted text quality with comprehensive checks.
         
         Args:
             text: Extracted text to validate
@@ -297,11 +391,29 @@ class PDFExtractor:
         if not text or len(text.strip()) < min_length:
             return False
         
-        word_count = len(text.split())
-        if word_count < 10:
+        # Basic word count check
+        words = text.split()
+        if len(words) < 10:
             return False
         
-        return True
+        # Calculate quality score
+        quality_score = self._calculate_extraction_quality(text)
+        
+        # For COBAC documents, be more lenient if we find regulatory indicators
+        regulatory_indicators = [
+            'commission bancaire', 'cobac', 'cemac', 'règlement', 'instruction',
+            'article', 'chapitre', 'decide', 'adopte', 'vu'
+        ]
+        
+        found_indicators = sum(1 for indicator in regulatory_indicators if indicator in text.lower())
+        
+        # If we found regulatory content, lower the quality threshold
+        if found_indicators >= 2:
+            logger.info(f"Found {found_indicators} regulatory indicators, using relaxed validation")
+            return quality_score >= 0.4  # Lower threshold for regulatory docs
+        
+        # For other documents, use standard threshold
+        return quality_score >= 0.6
     
     def _extract_with_pdfium(self, pdf_path: str) -> Tuple[str, Dict[int, str]]:
         """Extract text using pypdfium2 for better character encoding."""
@@ -405,6 +517,17 @@ class PDFExtractor:
         
         logger.info(f"OCR extraction completed. Extracted {len(page_texts)} pages with text.")
         return full_text.strip(), page_texts
+    
+    def _extract_with_ocr_safe(self, pdf_path: str) -> Tuple[str, Dict[int, str]]:
+        """Safe wrapper for OCR extraction with error recovery."""
+        error_manager = get_error_manager()
+        
+        try:
+            return self._extract_with_ocr(pdf_path)
+        except Exception as e:
+            error_manager._record_error(e, "_extract_with_ocr_safe", pdf_path)
+            logger.warning(f"OCR extraction failed safely: {e}")
+            return "", {}
     
     def _post_process_ocr_text(self, text: str) -> str:
         """Post-process OCR text to fix common errors."""

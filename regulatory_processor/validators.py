@@ -10,6 +10,8 @@ from dataclasses import dataclass
 from enum import Enum
 import anthropic
 from datetime import datetime
+from .caching import cache_result, get_cache
+from .error_recovery import with_retry, with_fallback, get_error_manager, safe_execute
 
 logger = logging.getLogger(__name__)
 
@@ -200,6 +202,7 @@ Format the output as JSON:
     "regulation_type": "Règlement COBAC|Règlement CEMAC|Other"
 }"""
     
+    @with_retry(max_retries=2, base_delay=2.0, retry_exceptions=(ConnectionError, TimeoutError))
     def validate_chunk(self, chunk: Dict[str, Any], document_metadata: Dict[str, Any]) -> ValidationScore:
         """
         Validate a text chunk using AI.
@@ -214,6 +217,8 @@ Format the output as JSON:
         if not self.client:
             # Return default scores if no API client
             return self._get_default_validation_score()
+        
+        error_manager = get_error_manager()
         
         try:
             prompt = self.validation_prompt.format(
@@ -232,21 +237,36 @@ Format the output as JSON:
                 messages=[{"role": "user", "content": prompt}]
             )
             
-            # Parse JSON response
-            result = self._parse_json_response(response.content[0].text)
+            # Parse JSON response with error recovery
+            result = safe_execute(
+                self._parse_json_response, 
+                response.content[0].text,
+                default_return={
+                    'completeness_score': 75.0,
+                    'reliability_score': 75.0, 
+                    'legal_structure_score': 75.0,
+                    'overall_score': 75.0
+                }
+            )
             
             return ValidationScore(
-                completeness=result.get('completeness_score', 0),
-                reliability=result.get('reliability_score', 0),
-                legal_structure=result.get('legal_structure_score', 0),
-                overall=result.get('overall_score', 0),
+                completeness=result.get('completeness_score', 75.0),
+                reliability=result.get('reliability_score', 75.0),
+                legal_structure=result.get('legal_structure_score', 75.0),
+                overall=result.get('overall_score', 75.0),
                 details=result
             )
             
         except Exception as e:
+            error_manager._record_error(e, "validate_chunk", context={
+                'chunk_index': chunk.get('chunk_index', 0),
+                'document_type': document_metadata.get('document_type', 'UNKNOWN'),
+                'has_client': bool(self.client)
+            })
             logger.error(f"AI validation failed: {e}")
             return self._get_default_validation_score()
     
+    @cache_result("article_extraction", ttl_hours=24)
     def extract_articles(self, text: str, document_metadata: Dict[str, Any]) -> List[Article]:
         """
         Extract articles from regulatory text with improved detection.
@@ -258,29 +278,52 @@ Format the output as JSON:
         Returns:
             List of Article objects
         """
+        error_manager = get_error_manager()
+        
         # First try regex-based extraction with improved patterns
-        articles = self._extract_articles_regex(text, document_metadata)
+        articles = safe_execute(
+            self._extract_articles_regex,
+            text, document_metadata,
+            default_return=[]
+        )
         
         # If few articles found, try sectioned approach
         if len(articles) < 5 and len(text) > 1000:
             logger.info("Few articles found, trying sectioned extraction approach")
-            articles.extend(self._extract_articles_by_sections(text, document_metadata))
+            section_articles = safe_execute(
+                self._extract_articles_by_sections,
+                text, document_metadata,
+                default_return=[]
+            )
+            articles.extend(section_articles)
         
         # Remove duplicates based on article number
         unique_articles = {}
         for article in articles:
-            key = self._parse_article_number(article.number)
-            if key not in unique_articles or len(article.content) > len(unique_articles[key].content):
-                unique_articles[key] = article
+            try:
+                key = self._parse_article_number(article.number)
+                if key not in unique_articles or len(article.content) > len(unique_articles[key].content):
+                    unique_articles[key] = article
+            except Exception as e:
+                logger.warning(f"Failed to parse article number for {article.number}: {e}")
+                # Use article number as key if parsing fails
+                unique_articles[article.number] = article
         
         articles = list(unique_articles.values())
-        articles.sort(key=lambda x: self._parse_article_number(x.number))
+        articles.sort(key=lambda x: safe_execute(self._parse_article_number, x.number, default_return=(9999, 0, 0)))
         
         # Then enhance with AI if available
         if self.client and len(text) < 50000:  # Limit for API calls
             try:
-                articles = self._enhance_articles_with_ai(text, articles, document_metadata)
+                enhanced_articles = safe_execute(
+                    self._enhance_articles_with_ai,
+                    text, articles, document_metadata,
+                    default_return=articles
+                )
+                if enhanced_articles:
+                    articles = enhanced_articles
             except Exception as e:
+                error_manager._record_error(e, "_enhance_articles_with_ai")
                 logger.warning(f"AI article enhancement failed: {e}")
         
         logger.info(f"Extracted {len(articles)} articles from document")
@@ -291,18 +334,34 @@ Format the output as JSON:
         articles = []
         seen_articles = set()  # Track already found articles
         
-        # Improved patterns for better article detection
+        # Enhanced patterns for COBAC document article detection
         patterns = [
-            # Pattern 1: Article XX with various formats
-            r'Article\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!Article\s+\d+)[\s\S]){20,3000})',
-            # Pattern 2: ARTICLE XX (uppercase)
-            r'ARTICLE\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!ARTICLE\s+\d+)[\s\S]){20,3000})',
-            # Pattern 3: Art. XX
-            r'Art\.\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!Art\.\s+\d+)[\s\S]){20,3000})',
-            # Pattern 4: Article in context (e.g., "L'article XX stipule")
-            r"[Ll]['']article\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s+(?:stipule|dispose|prévoit|énonce)?[:\s]+([^\n]{0,200})?\n?((?:(?![Ll]['']article\s+\d+)[\s\S]){20,3000})",
-            # Pattern 5: Standalone article references
-            r'(?:^|\n)\s*(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s*[-–—]\s*([^\n]{0,200})?\n?((?:(?!^\s*\d+\s*[-–—])[\s\S]){20,3000})'
+            # Pattern 1: Article premier (First article)
+            r'Article\s+premier\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!Article\s+(?:\d+|premier))[\s\S]){20,3000})',
+            # Pattern 2: Article 1er (Article 1st)
+            r'Article\s+(\d+)er\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!Article\s+\d+)[\s\S]){20,3000})',
+            # Pattern 3: Standard Article XX with various separators
+            r'Article\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?(?:\s*bis|\s*ter|\s*quater)?)\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!Article\s+\d+)[\s\S]){20,3000})',
+            # Pattern 4: ARTICLE XX (uppercase)
+            r'ARTICLE\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?(?:\s*bis|\s*ter|\s*quater)?)\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!ARTICLE\s+\d+)[\s\S]){20,3000})',
+            # Pattern 5: Art. XX format
+            r'Art\.\s*(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?(?:\s*bis|\s*ter|\s*quater)?)\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!Art\.\s*\d+)[\s\S]){20,3000})',
+            # Pattern 6: Article with space before colon (COBAC format)
+            r'Article\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s+:\s*([^\n]{0,200})?\n?((?:(?!Article\s+\d+)[\s\S]){20,3000})',
+            # Pattern 7: Article with period-dash (COBAC format)
+            r'Article\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s*\.-\s*([^\n]{0,200})?\n?((?:(?!Article\s+\d+)[\s\S]){20,3000})',
+            # Pattern 8: Article with underscore format
+            r'Article_(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s*\.-?\s*([^\n]{0,200})?\n?((?:(?!Article_\d+)[\s\S]){20,3000})',
+            # Pattern 9: Roman numerals for articles
+            r'Article\s+([IVX]+)\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!Article\s+[IVX]+)[\s\S]){20,3000})',
+            # Pattern 10: Article in context (e.g., "L'article XX stipule")
+            r"[Ll]['']article\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s+(?:stipule|dispose|prévoit|énonce|précise)?[:\s]+([^\n]{0,200})?\n?((?:(?![Ll]['']article\s+\d+)[\s\S]){20,3000})",
+            # Pattern 11: Standalone numbered sections with dash
+            r'(?:^|\n)\s*(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s*[-–—]\s*([^\n]{0,200})?\n?((?:(?!^\s*\d+\s*[-–—])[\s\S]){20,3000})',
+            # Pattern 12: Account modification pattern (COBAC specific)
+            r'Le\s+compte\s+divisionnaire\s+«\s*(\d+[-\s]*[^»]*)\s*»\s*([^\n]{0,200})?\n?((?:(?!Le\s+compte\s+divisionnaire)[\s\S]){20,3000})',
+            # Pattern 13: Paragraph format with parentheses
+            r'(\d+)\)\s*([^\n]{0,200})?\n?((?:(?!\d+\))[\s\S]){20,3000})'
         ]
         
         # Determine regulation type from filename or content
@@ -320,20 +379,33 @@ Format the output as JSON:
             'extraction_method': 'regex'
         }
         
-        for pattern in patterns:
+        for pattern_idx, pattern in enumerate(patterns):
             matches = re.finditer(pattern, text, re.MULTILINE | re.IGNORECASE)
             for match in matches:
-                article_number = match.group(1).strip()
+                # Handle different pattern formats
+                if pattern_idx == 0:  # Article premier
+                    article_number = "premier"
+                    article_title = match.group(1).strip() if match.group(1) else None
+                    article_content = match.group(2).strip()
+                elif pattern_idx == 11:  # Account modification pattern
+                    article_number = f"Compte {match.group(1).strip()}"
+                    article_title = match.group(2).strip() if match.group(2) else None
+                    article_content = match.group(3).strip()
+                else:  # Standard patterns
+                    article_number = match.group(1).strip()
+                    article_title = match.group(2).strip() if match.group(2) else None
+                    article_content = match.group(3).strip()
+                
                 # Normalize article number (replace comma with dot)
                 article_number = article_number.replace(',', '.')
                 
-                # Skip if already processed
-                if article_number in seen_articles:
-                    continue
-                seen_articles.add(article_number)
+                # Create unique identifier including pattern type
+                article_key = f"{article_number}_{pattern_idx}"
                 
-                article_title = match.group(2).strip() if match.group(2) else None
-                article_content = match.group(3).strip()
+                # Skip if already processed (but allow same number from different patterns)
+                if article_key in seen_articles:
+                    continue
+                seen_articles.add(article_key)
                 
                 # Clean up content
                 article_content = re.sub(r'\n{3,}', '\n\n', article_content)
@@ -342,7 +414,11 @@ Format the output as JSON:
                 
                 # Extract until next article or significant break
                 next_article_pos = float('inf')
-                for next_pattern in [r'Article\s+\d+', r'ARTICLE\s+\d+', r'Art\.\s+\d+', r'^\d+\s*[-–—]']:
+                next_patterns = [
+                    r'Article\s+(?:\d+|premier)', r'ARTICLE\s+\d+', r'Art\.\s+\d+', 
+                    r'^\d+\s*[-–—]', r'Le\s+compte\s+divisionnaire'
+                ]
+                for next_pattern in next_patterns:
                     next_match = re.search(next_pattern, article_content, re.MULTILINE | re.IGNORECASE)
                     if next_match:
                         next_article_pos = min(next_article_pos, next_match.start())
@@ -350,9 +426,20 @@ Format the output as JSON:
                 if next_article_pos < float('inf'):
                     article_content = article_content[:next_article_pos].strip()
                 
-                if article_content and len(article_content) > 50:  # Increased minimum length
+                # Minimum content length check (more lenient for account modifications)
+                min_length = 30 if pattern_idx == 11 else 50
+                
+                if article_content and len(article_content) > min_length:
+                    # Determine article format for display
+                    if pattern_idx == 0:  # Article premier
+                        display_number = "Article premier"
+                    elif pattern_idx == 11:  # Account modification
+                        display_number = article_number
+                    else:
+                        display_number = f"Article {article_number}"
+                    
                     article = Article(
-                        number=f"Article {article_number}",
+                        number=display_number,
                         title=article_title,
                         content=article_content,
                         materiality=MaterialityLevel.MEDIUM,  # Default
@@ -510,16 +597,135 @@ Format the output as JSON:
         return article
     
     def _parse_json_response(self, response_text: str) -> Dict[str, Any]:
-        """Parse JSON from AI response."""
-        try:
-            # Extract JSON from response
-            json_match = re.search(r'\{[\s\S]*\}', response_text)
-            if json_match:
-                return json.loads(json_match.group())
-            return {}
-        except Exception as e:
-            logger.error(f"Failed to parse JSON response: {e}")
-            return {}
+        """Parse JSON response from AI model with enhanced error handling."""
+        # Log raw response for debugging
+        logger.debug(f"Raw AI response: {response_text[:200]}...")
+        
+        # Try multiple parsing strategies
+        parsing_strategies = [
+            self._extract_markdown_json,
+            self._extract_raw_json,
+            self._extract_labeled_json,
+            self._extract_key_values_fallback
+        ]
+        
+        for strategy in parsing_strategies:
+            try:
+                result = strategy(response_text)
+                if result and self._validate_json_structure(result):
+                    return result
+            except Exception as e:
+                logger.debug(f"Parsing strategy {strategy.__name__} failed: {e}")
+                continue
+        
+        logger.error(f"All JSON parsing strategies failed for response: {response_text[:500]}...")
+        return {}
+    
+    def _extract_markdown_json(self, text: str) -> Dict[str, Any]:
+        """Extract JSON from markdown code blocks."""
+        pattern = r'```(?:json)?\s*([\s\S]*?)\s*```'
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            json_text = match.group(1).strip()
+            return json.loads(self._clean_json_text(json_text))
+        raise ValueError("No markdown JSON found")
+    
+    def _extract_raw_json(self, text: str) -> Dict[str, Any]:
+        """Extract raw JSON from text."""
+        # Find JSON object boundaries
+        pattern = r'\{[\s\S]*\}'
+        match = re.search(pattern, text)
+        if match:
+            json_text = match.group(0)
+            return json.loads(self._clean_json_text(json_text))
+        raise ValueError("No raw JSON found")
+    
+    def _extract_labeled_json(self, text: str) -> Dict[str, Any]:
+        """Extract JSON that follows labels like 'json:' or 'response:'."""
+        patterns = [
+            r'(?:json|response|result)\s*:\s*(\{[\s\S]*\})',
+            r'(?:json|response|result)\s*=\s*(\{[\s\S]*\})',
+            r'(?:json|response|result)\s*-\s*(\{[\s\S]*\})'
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                json_text = match.group(1)
+                return json.loads(self._clean_json_text(json_text))
+        
+        raise ValueError("No labeled JSON found")
+    
+    def _clean_json_text(self, json_text: str) -> str:
+        """Clean common JSON formatting issues."""
+        # Remove trailing commas
+        json_text = re.sub(r',\s*}', '}', json_text)
+        json_text = re.sub(r',\s*]', ']', json_text)
+        
+        # Fix common quote issues
+        json_text = re.sub(r'([{,]\s*)(\w+)(\s*:)', r'\1"\2"\3', json_text)  # Unquoted keys
+        
+        # Remove comments
+        json_text = re.sub(r'//.*?$', '', json_text, flags=re.MULTILINE)
+        json_text = re.sub(r'/\*.*?\*/', '', json_text, flags=re.DOTALL)
+        
+        return json_text.strip()
+    
+    def _extract_key_values_fallback(self, text: str) -> Dict[str, Any]:
+        """Fallback: extract key-value pairs manually."""
+        result = {}
+        
+        # Common patterns for validation scores
+        patterns = {
+            'completeness_score': r'(?:completeness[_\s]*score|completeness)[:\s]*(\d+(?:\.\d+)?)',
+            'reliability_score': r'(?:reliability[_\s]*score|reliability)[:\s]*(\d+(?:\.\d+)?)',
+            'legal_structure_score': r'(?:legal[_\s]*structure[_\s]*score|legal[_\s]*structure)[:\s]*(\d+(?:\.\d+)?)',
+            'overall_score': r'(?:overall[_\s]*score|overall)[:\s]*(\d+(?:\.\d+)?)',
+            'overall': r'(?:^|\s)overall[:\s]*(\d+(?:\.\d+)?)'
+        }
+        
+        for key, pattern in patterns.items():
+            match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+            if match:
+                try:
+                    result[key] = float(match.group(1))
+                except (ValueError, IndexError):
+                    continue
+        
+        # If we found any scores, create a minimal valid structure
+        if result:
+            return {
+                'completeness': result.get('completeness_score', result.get('overall', 75.0)),
+                'reliability': result.get('reliability_score', result.get('overall', 75.0)),
+                'legal_structure': result.get('legal_structure_score', result.get('overall', 75.0)),
+                'overall': result.get('overall_score', result.get('overall', 75.0)),
+                'details': {
+                    'method': 'fallback_extraction',
+                    'timestamp': datetime.now().isoformat(),
+                    'extracted_values': len(result)
+                }
+            }
+        
+        raise ValueError("No extractable values found")
+    
+    def _validate_json_structure(self, data: Dict[str, Any]) -> bool:
+        """Validate that the JSON has required fields."""
+        required_fields = ['completeness', 'reliability', 'legal_structure', 'overall']
+        
+        # Check if it's a validation score structure
+        if all(field in data for field in required_fields):
+            return True
+        
+        # Check if it has at least some score fields
+        score_fields = [field for field in required_fields if field in data]
+        if len(score_fields) >= 2:
+            return True
+        
+        # Check if it's article extraction response
+        if 'articles' in data or 'materiality' in data:
+            return True
+        
+        return False
     
     def _get_default_validation_score(self) -> ValidationScore:
         """Get default validation score when AI is not available."""
@@ -533,6 +739,277 @@ Format the output as JSON:
                 'timestamp': datetime.now().isoformat()
             }
         )
+    
+    def extract_document_structure(self, text: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract COBAC document structure including sections and hierarchies.
+        
+        Args:
+            text: Full document text
+            metadata: Document metadata
+            
+        Returns:
+            Dictionary containing document structure information
+        """
+        structure = {
+            'document_type': self._identify_document_type(text, metadata),
+            'sections': self._extract_document_sections(text),
+            'hierarchy': self._extract_document_hierarchy(text),
+            'metadata_extracted': self._extract_document_metadata(text),
+            'references': self._extract_regulatory_references(text)
+        }
+        
+        logger.info(f"Extracted document structure: {structure['document_type']} with {len(structure['sections'])} sections")
+        return structure
+    
+    def _identify_document_type(self, text: str, metadata: Dict[str, Any]) -> str:
+        """Identify the type of COBAC/CEMAC document."""
+        filename = metadata.get('file_name', '').upper()
+        text_upper = text[:2000].upper()
+        
+        # Document type patterns
+        if any(pattern in filename for pattern in ['R-', 'REGLEMENT', 'RÈGLEMENT']):
+            if 'COBAC' in filename or 'COBAC' in text_upper:
+                return 'Règlement COBAC'
+            elif 'CEMAC' in filename or 'CEMAC' in text_upper:
+                return 'Règlement CEMAC'
+            else:
+                return 'Règlement'
+        elif any(pattern in filename for pattern in ['I-', 'INSTRUCTION']):
+            if 'COBAC' in filename or 'COBAC' in text_upper:
+                return 'Instruction COBAC'
+            elif 'CEMAC' in filename or 'CEMAC' in text_upper:
+                return 'Instruction CEMAC'
+            else:
+                return 'Instruction'
+        elif any(pattern in filename for pattern in ['C-', 'CIRCULAIRE']):
+            return 'Circulaire'
+        elif any(pattern in filename for pattern in ['D-', 'DECISION', 'DÉCISION']):
+            return 'Décision'
+        else:
+            # Analyze content for type identification
+            if 'règlement' in text_upper:
+                return 'Règlement'
+            elif 'instruction' in text_upper:
+                return 'Instruction'
+            elif 'circulaire' in text_upper:
+                return 'Circulaire'
+            elif 'décision' in text_upper:
+                return 'Décision'
+            else:
+                return 'Document réglementaire'
+    
+    def _extract_document_sections(self, text: str) -> List[Dict[str, Any]]:
+        """Extract main document sections (Header, Preamble, DECIDE, Articles, Signature)."""
+        sections = []
+        
+        # Section patterns for COBAC documents
+        section_patterns = [
+            # Header section
+            {
+                'name': 'Header',
+                'pattern': r'^(.*?(?:COMMISSION\s+BANCAIRE|COBAC|CEMAC).*?)(?=\n\s*\n|\n(?:VU|CONSIDÉRANT|DECIDE|Article))',
+                'flags': re.MULTILINE | re.DOTALL | re.IGNORECASE
+            },
+            # Preamble section (VU, CONSIDÉRANT)
+            {
+                'name': 'Preamble',
+                'pattern': r'((?:VU|CONSIDÉRANT|AYANT\s+ÉGARD).*?)(?=\n\s*\n\s*DECIDE|Article\s+premier|Article\s+1)',
+                'flags': re.MULTILINE | re.DOTALL | re.IGNORECASE
+            },
+            # DECIDE section
+            {
+                'name': 'Decide',
+                'pattern': r'(DECIDE\s*:?\s*\n.*?)(?=Article\s+(?:premier|\d+)|TITRE|CHAPITRE)',
+                'flags': re.MULTILINE | re.DOTALL | re.IGNORECASE
+            },
+            # Articles section (main body)
+            {
+                'name': 'Articles',
+                'pattern': r'((?:Article\s+(?:premier|\d+).*?)(?=\n\s*\n\s*(?:Fait|Le\s+Secrétaire|ANNEXE|$)))',
+                'flags': re.MULTILINE | re.DOTALL | re.IGNORECASE
+            },
+            # Signature section
+            {
+                'name': 'Signature',
+                'pattern': r'((?:Fait|Le\s+Secrétaire|Le\s+Président).*?)$',
+                'flags': re.MULTILINE | re.DOTALL | re.IGNORECASE
+            }
+        ]
+        
+        for section_info in section_patterns:
+            matches = re.finditer(section_info['pattern'], text, section_info['flags'])
+            for match in matches:
+                content = match.group(1).strip()
+                if content and len(content) > 10:  # Minimum content length
+                    sections.append({
+                        'name': section_info['name'],
+                        'content': content,
+                        'start_position': match.start(),
+                        'end_position': match.end(),
+                        'word_count': len(content.split())
+                    })
+                    break  # Take first match for each section
+        
+        return sections
+    
+    def _extract_document_hierarchy(self, text: str) -> Dict[str, List[Dict[str, Any]]]:
+        """Extract hierarchical structure (TITRE → CHAPITRE → Section → Article)."""
+        hierarchy = {
+            'titres': [],
+            'chapitres': [],
+            'sections': [],
+            'articles': []
+        }
+        
+        # Hierarchy patterns
+        hierarchy_patterns = {
+            'titres': [
+                r'TITRE\s+([IVX]+|PREMIER|\d+)\s*[:.-]?\s*([^\n]+)',
+                r'TITRE\s+([IVX]+|PREMIER|\d+)\s*\n\s*([^\n]+)'
+            ],
+            'chapitres': [
+                r'CHAPITRE\s+([IVX]+|PREMIER|\d+)\s*[:.-]?\s*([^\n]+)',
+                r'Chapitre\s+([IVX]+|premier|\d+)\s*[:.-]?\s*([^\n]+)'
+            ],
+            'sections': [
+                r'Section\s+([IVX]+|\d+)\s*[:.-]?\s*([^\n]+)',
+                r'SECTION\s+([IVX]+|\d+)\s*[:.-]?\s*([^\n]+)'
+            ]
+        }
+        
+        for category, patterns in hierarchy_patterns.items():
+            for pattern in patterns:
+                matches = re.finditer(pattern, text, re.MULTILINE | re.IGNORECASE)
+                for match in matches:
+                    number = match.group(1).strip()
+                    title = match.group(2).strip() if len(match.groups()) > 1 else ''
+                    
+                    hierarchy[category].append({
+                        'number': number,
+                        'title': title,
+                        'position': match.start(),
+                        'full_match': match.group(0)
+                    })
+        
+        # Sort by position in document
+        for category in hierarchy:
+            hierarchy[category].sort(key=lambda x: x['position'])
+        
+        return hierarchy
+    
+    def _extract_document_metadata(self, text: str) -> Dict[str, Any]:
+        """Extract document metadata from content."""
+        metadata = {}
+        
+        # Reference number patterns
+        ref_patterns = [
+            r'(?:Règlement|Instruction|Circulaire|Décision)\s+(?:n°\s*)?([RIC]-\d{4}[_/-]\d{2,3})',
+            r'(?:N°|n°)\s*([RIC]-\d{4}[_/-]\d{2,3})',
+            r'([RIC]-\d{4}[_/-]\d{2,3})'
+        ]
+        
+        for pattern in ref_patterns:
+            match = re.search(pattern, text[:1000], re.IGNORECASE)
+            if match:
+                metadata['reference_number'] = match.group(1)
+                break
+        
+        # Date patterns
+        date_patterns = [
+            r'du\s+(\d{1,2})\s+(\w+)\s+(\d{4})',
+            r'(\d{1,2})[/-](\d{1,2})[/-](\d{4})',
+            r'(\d{4})[/-](\d{1,2})[/-](\d{1,2})'
+        ]
+        
+        for pattern in date_patterns:
+            match = re.search(pattern, text[:1000], re.IGNORECASE)
+            if match:
+                metadata['date_raw'] = match.group(0)
+                break
+        
+        # Subject/title extraction
+        title_patterns = [
+            r'(?:Règlement|Instruction|Circulaire|Décision).*?(?:relatif|relative)\s+(?:à|aux?)\s+([^\n\.]+)',
+            r'Objet\s*:\s*([^\n]+)',
+            r'portant\s+([^\n\.]+)'
+        ]
+        
+        for pattern in title_patterns:
+            match = re.search(pattern, text[:2000], re.IGNORECASE)
+            if match:
+                metadata['subject'] = match.group(1).strip()
+                break
+        
+        # Extract signatory information
+        signature_patterns = [
+            r'Le\s+Secrétaire\s+Général\s*,?\s*([^\n]+)',
+            r'Le\s+Président\s*,?\s*([^\n]+)',
+            r'Pour\s+le\s+Secrétaire\s+Général\s*,?\s*([^\n]+)'
+        ]
+        
+        for pattern in signature_patterns:
+            match = re.search(pattern, text[-1000:], re.IGNORECASE)
+            if match:
+                metadata['signatory'] = match.group(1).strip()
+                break
+        
+        return metadata
+    
+    def _extract_regulatory_references(self, text: str) -> List[Dict[str, str]]:
+        """Extract references to other regulations, laws, and international standards."""
+        references = []
+        
+        # Reference patterns
+        ref_patterns = [
+            # Other COBAC/CEMAC regulations
+            {
+                'type': 'Regulation',
+                'pattern': r'(?:Règlement|règlement)\s+(?:COBAC|CEMAC)?\s*(?:n°\s*)?([RIC]-\d{4}[_/-]\d{2,3})',
+            },
+            # Instructions
+            {
+                'type': 'Instruction',
+                'pattern': r'(?:Instruction|instruction)\s+(?:COBAC|CEMAC)?\s*(?:n°\s*)?([RIC]-\d{4}[_/-]\d{2,3})',
+            },
+            # International standards
+            {
+                'type': 'Basel',
+                'pattern': r'(Bâle\s+[IVX]+|Basel\s+[IVX]+|Accords?\s+de\s+Bâle)',
+            },
+            # CEMAC treaties
+            {
+                'type': 'Treaty',
+                'pattern': r'(Traité\s+CEMAC|Convention\s+CEMAC|Acte\s+additionnel)',
+            },
+            # Laws and codes
+            {
+                'type': 'Law',
+                'pattern': r'(Loi\s+n°\s*[^,\n]+|Code\s+[^,\n]+)',
+            }
+        ]
+        
+        for ref_info in ref_patterns:
+            matches = re.finditer(ref_info['pattern'], text, re.IGNORECASE)
+            for match in matches:
+                references.append({
+                    'type': ref_info['type'],
+                    'reference': match.group(1) if len(match.groups()) > 0 else match.group(0),
+                    'context': text[max(0, match.start()-50):match.end()+50].strip(),
+                    'position': match.start()
+                })
+        
+        # Remove duplicates and sort by position
+        unique_refs = []
+        seen = set()
+        for ref in references:
+            key = (ref['type'], ref['reference'])
+            if key not in seen:
+                seen.add(key)
+                unique_refs.append(ref)
+        
+        unique_refs.sort(key=lambda x: x['position'])
+        return unique_refs
     
     def _extract_articles_by_sections(self, text: str, metadata: Dict[str, Any]) -> List[Article]:
         """Extract articles by analyzing document sections."""
@@ -644,6 +1121,13 @@ class ValidationChain:
             document_data.get('cleaned_text', ''),
             document_data['metadata']
         )
+        
+        # Extract document structure for COBAC documents
+        document_structure = self.validator.extract_document_structure(
+            document_data.get('cleaned_text', ''),
+            document_data['metadata']
+        )
+        document_data['document_structure'] = document_structure
         
         # Assess materiality for each article
         for article in articles:

@@ -143,6 +143,10 @@ class ExcelExporter:
             # Create restructured document dictionary
             doc_dict = self._create_document_dictionary(doc, articles)
             
+            # Enhance with document structure if available
+            if 'document_structure' in doc:
+                doc_dict = self._enhance_with_document_structure(doc_dict, doc['document_structure'])
+            
             # Apply AI enhancement if available
             if hasattr(self, 'ai_enhancer'):
                 doc_dict = self._enhance_with_ai(doc_dict)
@@ -155,8 +159,9 @@ class ExcelExporter:
             df = pd.DataFrame(all_data)
             # Reorder columns for better readability
             priority_cols = ['Document', 'Type', 'Article_Number', 'Article_Title', 
-                           'Article_Content', 'Materiality', 'Key_Obligations', 
-                           'Compliance_Requirements', 'Penalties']
+                           'Article_Content', 'Materiality', 'Document_Structure',
+                           'Regulatory_Complexity', 'Key_Obligations', 
+                           'Compliance_Requirements', 'Penalties', 'Key_References']
             other_cols = [col for col in df.columns if col not in priority_cols]
             ordered_cols = [col for col in priority_cols if col in df.columns] + other_cols
             df = df[ordered_cols]
@@ -342,6 +347,85 @@ class ExcelExporter:
         
         return penalties[:10]  # Limit to top 10 penalties
     
+    def _enhance_with_document_structure(self, doc_dict: Dict[str, Any], structure: Dict[str, Any]) -> Dict[str, Any]:
+        """Enhance document dictionary with extracted structure information."""
+        # Add document structure information
+        doc_dict['structure_info'] = {
+            'document_type_identified': structure.get('document_type', 'Unknown'),
+            'sections_found': len(structure.get('sections', [])),
+            'hierarchy_levels': {
+                'titres': len(structure.get('hierarchy', {}).get('titres', [])),
+                'chapitres': len(structure.get('hierarchy', {}).get('chapitres', [])),
+                'sections': len(structure.get('hierarchy', {}).get('sections', []))
+            },
+            'regulatory_references': len(structure.get('references', [])),
+            'extracted_metadata': structure.get('metadata_extracted', {})
+        }
+        
+        # Enhance article context with structural information
+        if 'articles' in doc_dict:
+            for article in doc_dict['articles']:
+                # Find which section/chapter this article belongs to
+                article_context = self._find_article_context(article, structure)
+                if article_context:
+                    article['structural_context'] = article_context
+        
+        # Add regulatory compliance insights
+        doc_dict['compliance_insights'] = self._extract_compliance_insights(structure)
+        
+        return doc_dict
+    
+    def _find_article_context(self, article: Dict[str, Any], structure: Dict[str, Any]) -> Optional[Dict[str, str]]:
+        """Find the structural context (TITRE, CHAPITRE, Section) for an article."""
+        # This would need the article position to determine context
+        # For now, return basic structure information
+        hierarchy = structure.get('hierarchy', {})
+        
+        context = {}
+        if hierarchy.get('titres'):
+            context['titre'] = hierarchy['titres'][0].get('title', 'Unknown')
+        if hierarchy.get('chapitres'):
+            context['chapitre'] = hierarchy['chapitres'][0].get('title', 'Unknown')
+        if hierarchy.get('sections'):
+            context['section'] = hierarchy['sections'][0].get('title', 'Unknown')
+        
+        return context if context else None
+    
+    def _extract_compliance_insights(self, structure: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract compliance-related insights from document structure."""
+        insights = {
+            'regulatory_complexity': 'Low',
+            'key_references': [],
+            'document_completeness': 'Complete'
+        }
+        
+        # Assess regulatory complexity based on structure
+        total_sections = len(structure.get('sections', []))
+        total_hierarchy = sum(len(h) for h in structure.get('hierarchy', {}).values())
+        
+        if total_sections + total_hierarchy > 10:
+            insights['regulatory_complexity'] = 'High'
+        elif total_sections + total_hierarchy > 5:
+            insights['regulatory_complexity'] = 'Medium'
+        
+        # Extract key regulatory references
+        references = structure.get('references', [])
+        insights['key_references'] = [
+            f"{ref['type']}: {ref['reference']}" 
+            for ref in references[:5]  # Top 5 references
+        ]
+        
+        # Assess document completeness
+        sections = structure.get('sections', [])
+        expected_sections = ['Header', 'Preamble', 'Decide', 'Articles', 'Signature']
+        found_sections = [s['name'] for s in sections]
+        missing_sections = [s for s in expected_sections if s not in found_sections]
+        
+        if missing_sections:
+            insights['document_completeness'] = f"Missing: {', '.join(missing_sections)}"
+        
+        return insights
+    
     def _enhance_with_ai(self, doc_dict: Dict[str, Any]) -> Dict[str, Any]:
         """Enhance document dictionary with AI if available."""
         # This method would use AI to enhance the extraction
@@ -354,6 +438,9 @@ class ExcelExporter:
         doc_info = doc_dict['document_info']
         
         # Add summary row
+        structure_info = doc_dict.get('structure_info', {})
+        compliance_insights = doc_dict.get('compliance_insights', {})
+        
         summary_row = {
             'Document': doc_info['name'],
             'Type': doc_info['type'],
@@ -366,12 +453,25 @@ class ExcelExporter:
             'Materiality': 'INFO',
             'Key_Obligations': '; '.join(doc_dict['key_obligations'][:3]) if doc_dict['key_obligations'] else '',
             'Compliance_Requirements': '; '.join(doc_dict['compliance_requirements'][:3]) if doc_dict['compliance_requirements'] else '',
-            'Penalties': '; '.join(doc_dict['penalties'][:3]) if doc_dict['penalties'] else ''
+            'Penalties': '; '.join(doc_dict['penalties'][:3]) if doc_dict['penalties'] else '',
+            'Document_Structure': structure_info.get('document_type_identified', 'Unknown'),
+            'Regulatory_Complexity': compliance_insights.get('regulatory_complexity', 'Unknown'),
+            'Document_Completeness': compliance_insights.get('document_completeness', 'Unknown'),
+            'Key_References': '; '.join(compliance_insights.get('key_references', [])[:2])
         }
         flattened.append(summary_row)
         
         # Add article rows
         for article in doc_dict['articles']:
+            structural_context = article.get('structural_context', {})
+            context_text = []
+            if structural_context.get('titre'):
+                context_text.append(f"TITRE: {structural_context['titre']}")
+            if structural_context.get('chapitre'):
+                context_text.append(f"CHAPITRE: {structural_context['chapitre']}")
+            if structural_context.get('section'):
+                context_text.append(f"SECTION: {structural_context['section']}")
+            
             article_row = {
                 'Document': doc_info['name'],
                 'Type': doc_info['type'],
@@ -381,7 +481,11 @@ class ExcelExporter:
                 'Materiality': article.get('materiality', 'UNKNOWN'),
                 'Key_Obligations': '',
                 'Compliance_Requirements': '',
-                'Penalties': ''
+                'Penalties': '',
+                'Document_Structure': '; '.join(context_text) if context_text else '',
+                'Regulatory_Complexity': '',
+                'Document_Completeness': '',
+                'Key_References': ''
             }
             
             # Add specific requirements for this article

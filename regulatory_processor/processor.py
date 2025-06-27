@@ -14,6 +14,8 @@ from .chunkers import TextChunker, SemanticChunker
 from .exporters import ExcelExporter, CSVExporter
 from .validators import AIValidator, ValidationChain
 from .client_exporter import ClientExcelExporter
+from .caching import get_cache
+from .error_recovery import get_error_manager, with_retry, safe_execute
 from .utils import (
     calculate_file_hash, clean_text, identify_document_type,
     validate_pdf_file, get_pdf_files, create_output_directory
@@ -61,6 +63,7 @@ class RegulatoryDocumentProcessor:
         self.processed_documents = []
         self.processing_errors = []
     
+    @with_retry(max_retries=1, base_delay=2.0, retry_exceptions=(OSError, PermissionError))
     def process_document(self, pdf_path: str) -> Optional[Dict[str, Any]]:
         """
         Process a single PDF document through the entire pipeline.
@@ -72,11 +75,17 @@ class RegulatoryDocumentProcessor:
             Dictionary containing all processed data, or None if processing failed
         """
         logger.info(f"Starting processing: {pdf_path}")
+        error_manager = get_error_manager()
         
-        is_valid, error_msg = validate_pdf_file(
+        # File validation with error recovery
+        validation_result = safe_execute(
+            validate_pdf_file,
             pdf_path, 
-            max_size_mb=self.config.max_file_size_mb
+            max_size_mb=self.config.max_file_size_mb,
+            default_return=(False, "Validation failed")
         )
+        
+        is_valid, error_msg = validation_result
         if not is_valid:
             logger.error(f"Validation failed for {pdf_path}: {error_msg}")
             self.processing_errors.append({
@@ -87,21 +96,58 @@ class RegulatoryDocumentProcessor:
             return None
         
         try:
-            metadata = self._extract_metadata(pdf_path)
+            # Extract metadata with error recovery
+            metadata = safe_execute(
+                self._extract_metadata,
+                pdf_path,
+                default_return={'file_name': os.path.basename(pdf_path), 'extraction_date': datetime.now().isoformat()}
+            )
             
-            full_text, page_texts = self.extractor.extract_text(pdf_path)
+            # Extract text with built-in error recovery (from decorator)
+            extraction_result = safe_execute(
+                self.extractor.extract_text,
+                pdf_path,
+                default_return=("", {})
+            )
             
-            if not full_text or not self.extractor.validate_extraction(full_text):
+            full_text, page_texts = extraction_result
+            
+            if not full_text or not safe_execute(self.extractor.validate_extraction, full_text, default_return=False):
                 logger.warning(f"No valid text extracted from {pdf_path}")
                 return self._create_empty_document(metadata)
             
-            cleaned_text = clean_text(full_text) if self.config.clean_text else full_text
+            # Clean text safely
+            cleaned_text = safe_execute(
+                clean_text,
+                full_text,
+                default_return=full_text
+            ) if self.config.clean_text else full_text
             
-            chunks = self.chunker.chunk_by_sections(cleaned_text, metadata)
+            # Chunk text with fallback
+            chunks = safe_execute(
+                self.chunker.chunk_by_sections,
+                cleaned_text, metadata,
+                default_return=[]
+            )
+            
             if not chunks:
-                chunks = self.chunker.chunk_by_sentences(cleaned_text, metadata)
+                chunks = safe_execute(
+                    self.chunker.chunk_by_sentences,
+                    cleaned_text, metadata,
+                    default_return=[]
+                )
             
-            statistics = self._calculate_statistics(cleaned_text, chunks)
+            # Calculate statistics safely
+            statistics = safe_execute(
+                self._calculate_statistics,
+                cleaned_text, chunks,
+                default_return={
+                    'total_characters': len(cleaned_text),
+                    'total_words': len(cleaned_text.split()),
+                    'total_chunks': len(chunks),
+                    'extraction_success': bool(full_text)
+                }
+            )
             
             document_data = {
                 'metadata': metadata,
@@ -115,11 +161,20 @@ class RegulatoryDocumentProcessor:
             # Apply AI validation and article extraction if enabled
             if self.validation_chain and (self.config.enable_ai_validation or self.config.extract_articles):
                 logger.info(f"Running AI validation and article extraction for {pdf_path}")
-                document_data = self.validation_chain.validate_document(document_data)
                 
-                # Log validation results
+                # Safely run validation chain
+                validated_data = safe_execute(
+                    self.validation_chain.validate_document,
+                    document_data,
+                    default_return=document_data
+                )
+                
+                if validated_data:
+                    document_data = validated_data
+                
+                # Log validation results safely
                 if 'validation_results' in document_data:
-                    overall_score = document_data['validation_results']['document_validation'].get('overall_score', 0)
+                    overall_score = document_data['validation_results'].get('document_validation', {}).get('overall_score', 0)
                     logger.info(f"Document validation score: {overall_score:.1f}/100")
                     
                 if 'articles' in document_data:
@@ -361,3 +416,132 @@ class RegulatoryDocumentProcessor:
                 f.write("-" * 40 + "\n")
         
         logger.info(f"Error report saved to: {error_path}")
+    
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get cache statistics and performance metrics."""
+        cache = get_cache()
+        return cache.get_stats()
+    
+    def clear_cache(self, operation_type: Optional[str] = None) -> None:
+        """
+        Clear processing cache.
+        
+        Args:
+            operation_type: Specific operation type to clear (e.g., 'text_extraction', 'article_extraction')
+                          If None, clears all cache
+        """
+        cache = get_cache()
+        cache.clear(operation_type)
+        logger.info(f"Cache cleared" + (f" for operation: {operation_type}" if operation_type else " (all)"))
+    
+    def get_error_summary(self, hours_back: int = 24) -> Dict[str, Any]:
+        """
+        Get comprehensive error summary and recommendations.
+        
+        Args:
+            hours_back: Number of hours to look back for error analysis
+            
+        Returns:
+            Error summary with recommendations
+        """
+        error_manager = get_error_manager()
+        return error_manager.get_error_summary(hours_back)
+    
+    def get_system_health(self) -> Dict[str, Any]:
+        """Get overall system health report including cache and error metrics."""
+        cache_stats = self.get_cache_stats()
+        error_summary = self.get_error_summary()
+        
+        # Calculate health score based on various metrics
+        health_score = 100.0
+        issues = []
+        
+        # Check error rates
+        total_errors = error_summary.get('total_errors', 0)
+        if total_errors > 10:
+            health_score -= 20
+            issues.append(f"High error count: {total_errors} errors in last 24h")
+        elif total_errors > 5:
+            health_score -= 10
+            issues.append(f"Moderate error count: {total_errors} errors in last 24h")
+        
+        # Check recovery success rate
+        recovery_rates = error_summary.get('recovery_success_rate', {})
+        avg_recovery_rate = sum(recovery_rates.values()) / len(recovery_rates) if recovery_rates else 1.0
+        if avg_recovery_rate < 0.5:
+            health_score -= 15
+            issues.append(f"Low recovery success rate: {avg_recovery_rate:.1%}")
+        
+        # Check cache performance
+        cache_hit_rate = cache_stats.get('total_accesses', 0) / max(cache_stats.get('total_disk_entries', 1), 1)
+        if cache_hit_rate < 0.3:
+            health_score -= 5
+            issues.append("Low cache efficiency")
+        
+        # Check for problematic files
+        problematic_files = error_summary.get('most_problematic_files', [])
+        if len(problematic_files) > 3:
+            health_score -= 10
+            issues.append(f"{len(problematic_files)} files with repeated errors")
+        
+        health_status = "EXCELLENT" if health_score >= 90 else \
+                       "GOOD" if health_score >= 75 else \
+                       "FAIR" if health_score >= 60 else \
+                       "POOR"
+        
+        return {
+            'health_score': health_score,
+            'health_status': health_status,
+            'issues': issues,
+            'cache_stats': cache_stats,
+            'error_summary': error_summary,
+            'recommendations': error_summary.get('recommendations', []),
+            'last_updated': datetime.now().isoformat()
+        }
+    
+    def optimize_performance(self) -> Dict[str, str]:
+        """
+        Perform automatic performance optimizations.
+        
+        Returns:
+            Dictionary of optimization actions taken
+        """
+        actions = {}
+        
+        # Clean expired cache entries
+        try:
+            cache = get_cache()
+            cache._cleanup_expired()
+            actions['cache_cleanup'] = "Cleaned expired cache entries"
+        except Exception as e:
+            actions['cache_cleanup'] = f"Failed: {e}"
+        
+        # Optimize memory cache
+        try:
+            cache = get_cache()
+            if len(cache.memory_cache) > cache.max_memory_size * 0.8:
+                cache._evict_memory_cache()
+                actions['memory_optimization'] = "Evicted old memory cache entries"
+            else:
+                actions['memory_optimization'] = "Memory cache within optimal range"
+        except Exception as e:
+            actions['memory_optimization'] = f"Failed: {e}"
+        
+        # Reset processing errors if they're too old
+        current_time = datetime.now()
+        old_errors = [
+            err for err in self.processing_errors
+            if (current_time - datetime.fromisoformat(err['timestamp'])).total_seconds() > 86400  # 24 hours
+        ]
+        
+        if old_errors:
+            self.processing_errors = [
+                err for err in self.processing_errors
+                if err not in old_errors
+            ]
+            actions['error_cleanup'] = f"Removed {len(old_errors)} old error records"
+        else:
+            actions['error_cleanup'] = "No old errors to clean up"
+        
+        logger.info(f"Performance optimization completed: {len(actions)} actions taken")
+        return actions
