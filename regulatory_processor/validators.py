@@ -342,7 +342,7 @@ Format the output as JSON:
                 
                 # Extract until next article or significant break
                 next_article_pos = float('inf')
-                for next_pattern in ['Article\s+\d+', 'ARTICLE\s+\d+', 'Art\.\s+\d+', r'^\d+\s*[-–—]']:
+                for next_pattern in [r'Article\s+\d+', r'ARTICLE\s+\d+', r'Art\.\s+\d+', r'^\d+\s*[-–—]']:
                     next_match = re.search(next_pattern, article_content, re.MULTILINE | re.IGNORECASE)
                     if next_match:
                         next_article_pos = min(next_article_pos, next_match.start())
@@ -533,6 +533,75 @@ Format the output as JSON:
                 'timestamp': datetime.now().isoformat()
             }
         )
+    
+    def _extract_articles_by_sections(self, text: str, metadata: Dict[str, Any]) -> List[Article]:
+        """Extract articles by analyzing document sections."""
+        articles = []
+        
+        # Split text into sections based on common patterns
+        section_patterns = [
+            r'\n{2,}(?=Article\s+\d+)',
+            r'\n{2,}(?=ARTICLE\s+\d+)',
+            r'\n{2,}(?=Art\.\s+\d+)',
+            r'\n{2,}(?=\d+\s*[-–—])'
+        ]
+        
+        sections = [text]
+        for pattern in section_patterns:
+            new_sections = []
+            for section in sections:
+                parts = re.split(pattern, section)
+                new_sections.extend(parts)
+            sections = new_sections
+        
+        # Process each section to find articles
+        for section in sections:
+            if len(section.strip()) < 50:
+                continue
+                
+            # Look for article indicators at the beginning of sections
+            article_match = re.match(
+                r'^(Article|ARTICLE|Art\.)\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s*[:.-]?\s*([^\n]{0,200})?',
+                section.strip(), 
+                re.IGNORECASE
+            )
+            
+            if article_match:
+                article_number = article_match.group(2).replace(',', '.')
+                article_title = article_match.group(3).strip() if article_match.group(3) else None
+                
+                # Get content after the article header
+                content_start = article_match.end()
+                article_content = section[content_start:].strip()
+                
+                if article_content and len(article_content) > 50:
+                    context = {
+                        'regulation_name': metadata.get('file_name', '').replace('.pdf', ''),
+                        'regulation_type': self._determine_regulation_type(text, metadata),
+                        'document_type': metadata.get('document_type', 'UNKNOWN'),
+                        'extraction_method': 'section_based'
+                    }
+                    
+                    article = Article(
+                        number=f"Article {article_number}",
+                        title=article_title,
+                        content=article_content,
+                        materiality=MaterialityLevel.MEDIUM,
+                        materiality_reasoning="Pending AI assessment",
+                        context=context
+                    )
+                    articles.append(article)
+        
+        return articles
+    
+    def _determine_regulation_type(self, text: str, metadata: Dict[str, Any]) -> str:
+        """Determine regulation type from text and metadata."""
+        filename = metadata.get('file_name', '')
+        if 'COBAC' in filename.upper() or 'COBAC' in text[:1000].upper():
+            return 'Règlement COBAC'
+        elif 'CEMAC' in filename.upper() or 'CEMAC' in text[:1000].upper():
+            return 'Règlement CEMAC'
+        return 'UNKNOWN'
 
 
 class ValidationChain:
@@ -722,72 +791,3 @@ class ValidationChain:
             return 0.0
         except:
             return 0.0
-    
-    def _extract_articles_by_sections(self, text: str, metadata: Dict[str, Any]) -> List[Article]:
-        """Extract articles by analyzing document sections."""
-        articles = []
-        
-        # Split text into sections based on common patterns
-        section_patterns = [
-            r'\n{2,}(?=Article\s+\d+)',
-            r'\n{2,}(?=ARTICLE\s+\d+)',
-            r'\n{2,}(?=Art\.\s+\d+)',
-            r'\n{2,}(?=\d+\s*[-–—])'
-        ]
-        
-        sections = [text]
-        for pattern in section_patterns:
-            new_sections = []
-            for section in sections:
-                parts = re.split(pattern, section)
-                new_sections.extend(parts)
-            sections = new_sections
-        
-        # Process each section to find articles
-        for section in sections:
-            if len(section.strip()) < 50:
-                continue
-                
-            # Look for article indicators at the beginning of sections
-            article_match = re.match(
-                r'^(Article|ARTICLE|Art\.)\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?)\s*[:.-]?\s*([^\n]{0,200})?',
-                section.strip(), 
-                re.IGNORECASE
-            )
-            
-            if article_match:
-                article_number = article_match.group(2).replace(',', '.')
-                article_title = article_match.group(3).strip() if article_match.group(3) else None
-                
-                # Get content after the article header
-                content_start = article_match.end()
-                article_content = section[content_start:].strip()
-                
-                if article_content and len(article_content) > 50:
-                    context = {
-                        'regulation_name': metadata.get('file_name', '').replace('.pdf', ''),
-                        'regulation_type': self._determine_regulation_type(text, metadata),
-                        'document_type': metadata.get('document_type', 'UNKNOWN'),
-                        'extraction_method': 'section_based'
-                    }
-                    
-                    article = Article(
-                        number=f"Article {article_number}",
-                        title=article_title,
-                        content=article_content,
-                        materiality=MaterialityLevel.MEDIUM,
-                        materiality_reasoning="Pending AI assessment",
-                        context=context
-                    )
-                    articles.append(article)
-        
-        return articles
-    
-    def _determine_regulation_type(self, text: str, metadata: Dict[str, Any]) -> str:
-        """Determine regulation type from text and metadata."""
-        filename = metadata.get('file_name', '')
-        if 'COBAC' in filename.upper() or 'COBAC' in text[:1000].upper():
-            return 'Règlement COBAC'
-        elif 'CEMAC' in filename.upper() or 'CEMAC' in text[:1000].upper():
-            return 'Règlement CEMAC'
-        return 'UNKNOWN'

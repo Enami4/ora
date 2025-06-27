@@ -19,7 +19,8 @@
       "Bash(./OraEnv/Scripts/python.exe -c \"from regulatory_processor import RegulatoryDocumentProcessor; print('Application ready!')\")",
       "Bash(./OraEnv/Scripts/python.exe ocr_engine.py)",
       "Bash(./OraEnv/Scripts/python.exe -c \"from regulatory_processor.extractors import PDFExtractor; ext = PDFExtractor(); print(f'OCR Available: {ext.extraction_methods[-1].__name__ == \\\"_extract_with_ocr\\\" if ext.extraction_methods else False}')\")",
-      "Bash(./OraEnv/Scripts/python.exe test_ocr_functionality.py)"
+      "Bash(./OraEnv/Scripts/python.exe test_ocr_functionality.py)",
+      "Bash(./OraEnv/Scripts/python.exe -c \"\nfrom regulatory_processor.validators import AIValidator\nmethods = [method for method in dir(AIValidator) if '_extract' in method]\nprint('Available extract methods:')\nfor method in methods:\n    print(f'  - {method}')\n\")"
     ],
     "deny": []
   }

@@ -35,7 +35,7 @@ def test_ocr_extraction():
             result = processor.process_document(pdf_path)
             
             if result:
-                print(f"✓ Document processed successfully")
+                print(f"SUCCESS: Document processed successfully")
                 print(f"  - Total characters: {result['statistics']['total_characters']:,}")
                 print(f"  - Total words: {result['statistics']['total_words']:,}")
                 print(f"  - Total chunks: {result['statistics']['total_chunks']}")
@@ -55,11 +55,11 @@ def test_ocr_extraction():
                 print(f"\n  Text sample: {sample_text}...")
                 
             else:
-                print(f"✗ Failed to process document")
+                print(f"FAILED: Failed to process document")
             
             break  # Just test one document
         else:
-            print(f"✗ Test PDF not found: {pdf_path}")
+            print(f"ERROR: Test PDF not found: {pdf_path}")
 
 if __name__ == "__main__":
     test_ocr_extraction()
