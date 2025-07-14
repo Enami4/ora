@@ -1,0 +1,736 @@
+{
+  "analysis_date": "2025-07-14T11:47:46.282996",
+  "total_files_analyzed": 9,
+  "detailed_analyses": [
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/cartographie_reglementaire_v4.xlsx",
+      "file_name": "cartographie_reglementaire_v4.xlsx",
+      "file_size": 54036,
+      "analysis_date": "2025-07-14T11:47:46.010982",
+      "sheets": {},
+      "shared_strings": [
+        "Référence du texte",
+        "Date de parution",
+        "Date d'entrée en vigueur",
+        "Résumé du contenu",
+        "Obligations opérationnelles",
+        "Articles de référence",
+        "Sanctions prévues",
+        "Impact/poids sur une banque",
+        "I_ ORGANISATION ET FONCTIONNEMENT  De LA COBAC",
+        "V-1_Regime general",
+        "Titre du texte",
+        "V_SYSTEMES ET MOYENS DE PAIEMENT",
+        "Règlement n°03/16/CEMAC/UMAC/CM",
+        "21/12/2016",
+        "Règlement relatif aux systèmes, moyens et incidents de paiement dans la CEMAC. Encadre les obligations liées aux moyens de paiement (chèque, virement, carte, monnaie électronique), établit les droits des usagers, les devoirs des établissements, les mesures de prévention et de sanction, et les modalités de centralisation des incidents par la BEAC.",
+        "- Obligation de paiement scriptural au-delà de 500 000 FCFA (Art. 3-4)\r\n- Droit au compte pour toute personne (Art. 7-11)\r\n- Contrôle et retrait des moyens de paiement en cas d'incident (Art. 196-198)\r\n- Reporting régulier à la BEAC sur les incidents et les données client (Art. 230-234)\r\n'- Centralisation des données via les fichiers régionaux gérés par la BEAC (Art. 210-225)\r\n- Obligations d’information au client (Art. 12, 167-168, 181-182)\r\n- Garantie de fonctionnement des systèmes de paiement interbancaire (Art. 253-273)",
+        "Art. 3-6, 7-11, 12, 167-168, 196-198, 210-234, 253-273",
+        "- Amendes de 100 000 à 3 000 000 FCFA pour les établissements (Art. 250)\r\n- Peines d’emprisonnement jusqu’à 10 ans et amendes jusqu’à 10 000 000 FCFA pour les personnes physiques (Art. 237-248)\r\n'- Sanctions spécifiques pour non-déclaration ou violations d’interdictions (Art. 250-252)",
+        "Très élevé : impose des obligations strictes de contrôle, de traçabilité et de sécurité sur tous les moyens de paiement. Encadre fortement la gestion des incidents, le droit au compte, la communication client et les responsabilités légales. Toute violation expose l’établissement à de lourdes sanctions administratives et pénales.",
+        "Instruction n°01/GR/2014"
+      ],
+      "worksheets_analysis": {
+        "sheet4": {
+          "shared_string_refs": [
+            "0",
+            "10",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "494"
+          ],
+          "direct_values": [],
+          "dimension": "A1:I28",
+          "content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"><dimension ref=\"A1:I28\"/><sheetViews><sheetView workbookViewId=\"0\"><selection activeCell=\"C6\" sqref=\"C6\"/></sheetView></sh"
+        },
+        "sheet1": {
+          "shared_string_refs": [
+            "0",
+            "10",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8"
+          ],
+          "direct_values": [],
+          "dimension": "A1:I17",
+          "content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"><dimension ref=\"A1:I17\"/><sheetViews><sheetView topLeftCell=\"G1\" workbookViewId=\"0\"><selection activeCell=\"H4\" sqref=\"H4\"/"
+        },
+        "sheet3": {
+          "shared_string_refs": [],
+          "direct_values": [],
+          "dimension": "A1",
+          "content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"><sheetPr><tabColor rgb=\"FFFF0000\"/></sheetPr><dimension ref=\"A1\"/><sheetViews><sheetView workbookViewId=\"0\"><selection act"
+        },
+        "sheet2": {
+          "shared_string_refs": [],
+          "direct_values": [],
+          "dimension": "A1",
+          "content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"><sheetPr><tabColor rgb=\"FFFF0000\"/></sheetPr><dimension ref=\"A1\"/><sheetViews><sheetView workbookViewId=\"0\"><selection act"
+        },
+        "sheet9": {
+          "shared_string_refs": [
+            "0",
+            "10",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "206"
+          ],
+          "direct_values": [],
+          "dimension": "A1:I12",
+          "content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"><sheetPr><tabColor rgb=\"FF00B050\"/></sheetPr><dimension ref=\"A1:I12\"/><sheetViews><sheetView workbookViewId=\"0\"><selection"
+        },
+        "sheet5": {
+          "shared_string_refs": [
+            "0",
+            "10",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "11"
+          ],
+          "direct_values": [],
+          "dimension": "A1:I26",
+          "content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"><sheetPr><tabColor rgb=\"FF00B050\"/></sheetPr><dimension ref=\"A1:I26\"/><sheetViews><sheetView tabSelected=\"1\" workbookViewI"
+        },
+        "sheet6": {
+          "shared_string_refs": [
+            "0",
+            "10",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "265"
+          ],
+          "direct_values": [],
+          "dimension": "A1:J33",
+          "content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"><sheetPr><tabColor rgb=\"FF00B050\"/></sheetPr><dimension ref=\"A1:J33\"/><sheetViews><sheetView workbookViewId=\"0\"><selection"
+        },
+        "sheet7": {
+          "shared_string_refs": [
+            "0",
+            "10",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "150"
+          ],
+          "direct_values": [],
+          "dimension": "A1:I14",
+          "content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"><sheetPr><tabColor rgb=\"FF00B050\"/></sheetPr><dimension ref=\"A1:I14\"/><sheetViews><sheetView workbookViewId=\"0\"><selection"
+        },
+        "sheet8": {
+          "shared_string_refs": [
+            "0",
+            "10",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "197"
+          ],
+          "direct_values": [],
+          "dimension": "A1:I12",
+          "content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"><sheetPr><tabColor rgb=\"FF00B050\"/></sheetPr><dimension ref=\"A1:I12\"/><sheetViews><sheetView workbookViewId=\"0\"><selection"
+        }
+      },
+      "sheet_names": [
+        "I",
+        "II",
+        "III",
+        "IV",
+        "V",
+        "VI",
+        "VII",
+        "VIII",
+        "IX"
+      ],
+      "workbook_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x15\" xmlns:x15=\"http://schemas.microsoft.com/office/spreadsheetml/2010/11/main\"><fileVersion appName=\"xl\" lastEdited=\"6\" lowestEdited=\"5\" rupBuild=\"14420\"/><workbookPr/><mc:AlternateContent xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"><mc:Choice Requires=\"x15\"><x15ac:absPath url=\"C:\\Users\\DIRECTION-OPERATIONS\\Documents\\MM\\2M CONSEIL\\Reglementation COBAC\\\" xmlns:x15ac=\"http://schemas.microsoft.com/office/spreadsheetml/2010/11/ac\"/></mc:Choice></mc:AlternateContent><bookViews><workbookView xWindow=\"0\" yWindow=\"0\" windowWidth=\"20490\" windowHeight=\"7500\" activeTab=\"4\"/></bookViews><sheets><sheet name=\"I\" sheetId=\"9\" r:id=\"rId1\"/><sheet name=\"II\" sheetId=\"8\" r:id=\"rId2\"/><sh"
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_20250714_104522.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_20250714_104522.xlsx",
+      "file_size": 31603,
+      "analysis_date": "2025-07-14T11:47:46.050495",
+      "sheets": {},
+      "shared_strings": [],
+      "worksheets_analysis": {
+        "sheet1": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Référence du texte",
+            "Titre du texte",
+            "Date de parution",
+            "Date d'entrée en vigueur",
+            "Résumé du contenu",
+            "Obligations opérationnelles",
+            "Articles de référence",
+            "Sanctions prévues",
+            "Impact/poids sur une banque",
+            "I_ ORGANISATION ET FONCTIONNEMENT DE LA COBAC"
+          ],
+          "dimension": "A1:I132",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:I132\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"20\" customWidth=\"1\" min=\"1\" max=\"1\" /><co"
+        }
+      },
+      "sheet_names": [
+        "Cartographie_Reglementaire"
+      ],
+      "workbook_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets><definedNames><definedName name=\"_xlnm._FilterDatabase\" localSheetId=\"0\" hidden=\"1\">'Cartographie_Reglementaire'!$A$1:$I$132</definedName></definedNames><calcPr calcId=\"124519\" fullCalcOnLoad=\"1\" /></workbook>"
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva.xlsx",
+      "file_size": 23785,
+      "analysis_date": "2025-07-14T11:47:46.087748",
+      "sheets": {},
+      "shared_strings": [],
+      "worksheets_analysis": {
+        "sheet1": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Référence du texte",
+            "Titre du texte",
+            "Date de parution",
+            "Date d'entrée en vigueur",
+            "Résumé du contenu",
+            "Obligations opérationnelles",
+            "Articles de référence",
+            "Sanctions prévues",
+            "Impact/poids sur une banque",
+            "I_ ORGANISATION ET FONCTIONNEMENT DE LA COBAC"
+          ],
+          "dimension": "A1:I92",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:I92\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"20\" customWidth=\"1\" min=\"1\" max=\"1\" /><col"
+        }
+      },
+      "sheet_names": [
+        "Cartographie_Reglementaire"
+      ],
+      "workbook_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets><definedNames><definedName name=\"_xlnm._FilterDatabase\" localSheetId=\"0\" hidden=\"1\">'Cartographie_Reglementaire'!$A$1:$I$92</definedName></definedNames><calcPr calcId=\"124519\" fullCalcOnLoad=\"1\" /></workbook>"
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_173703.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_173703.xlsx",
+      "file_size": 13518,
+      "analysis_date": "2025-07-14T11:47:46.122944",
+      "sheets": {},
+      "shared_strings": [],
+      "worksheets_analysis": {
+        "sheet1": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "File Name",
+            "Document Type",
+            "File Path",
+            "File Size",
+            "Page Count",
+            "Title",
+            "Author",
+            "Creation Date",
+            "Extraction Date",
+            "Total Characters"
+          ],
+          "dimension": "A1:P2",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:P2\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"22\" customWidth=\"1\" min=\"1\" max=\"1\" /><col "
+        },
+        "sheet2": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Document",
+            "Type",
+            "Article_Number",
+            "Article_Title",
+            "Article_Content",
+            "Materiality",
+            "Document_Structure",
+            "Regulatory_Complexity",
+            "Key_Obligations",
+            "Compliance_Requirements"
+          ],
+          "dimension": "A1:M22",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:M22\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"22\" customWidth=\"1\" min=\"1\" max=\"1\" /><col"
+        },
+        "sheet3": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "File Name",
+            "Document Type",
+            "Overall Document Score",
+            "Extraction Quality Score",
+            "Chunk Boundary Integrity",
+            "Legal Structure Score",
+            "Completeness Score",
+            "Total Articles",
+            "Validation Timestamp",
+            "Extraction Issues"
+          ],
+          "dimension": "A1:K2",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:K2\" /><sheetViews><sheetView workbookViewId=\"0\"><selection activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"22\" customWidth=\"1\" min=\"1\" max=\"1\" /><col width=\"15\" customWidth=\"1\" min=\"2\" max=\"2\" /><col width=\"24\" customWidth=\"1\" min=\"3\" max=\"3\" "
+        },
+        "sheet4": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Metric",
+            "Value",
+            "Total Documents Processed",
+            "Successful Extractions",
+            "Failed Extractions",
+            "Total Pages",
+            "Total Chunks Generated",
+            "Average Pages per Document",
+            "Average Chunks per Document",
+            "Documents of Type: OTHER"
+          ],
+          "dimension": "A1:B9",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:B9\" /><sheetViews><sheetView workbookViewId=\"0\"><selection activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"29\" customWidth=\"1\" min=\"1\" max=\"1\" /><col width=\"8\" customWidth=\"1\" min=\"2\" max=\"2\" /></cols><sheetData><row r=\"1\" ht=\"30\" customHeight"
+        },
+        "sheet5": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Processing Date",
+            "Total Documents",
+            "Successful Extractions",
+            "Total Pages",
+            "Total Chunks",
+            "Total Characters",
+            "Total Words",
+            "Processed By",
+            "User First Name",
+            "User Last Name"
+          ],
+          "dimension": "A1:J2",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:J2\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"21\" customWidth=\"1\" min=\"1\" max=\"1\" /><col "
+        }
+      },
+      "sheet_names": [
+        "Document_Metadata",
+        "Data",
+        "Validation_Results",
+        "Statistics",
+        "Summary"
+      ],
+      "workbook_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Document_Metadata\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /><sheet name=\"Data\" sheetId=\"2\" state=\"visible\" r:id=\"rId2\" /><sheet name=\"Validation_Results\" sheetId=\"3\" state=\"visible\" r:id=\"rId3\" /><sheet name=\"Statistics\" sheetId=\"4\" state=\"visible\" r:id=\"rId4\" /><sheet name=\"Summary\" sheetId=\"5\" state=\"visible\" r:id=\"rId5\" /></sheets><definedNames /><calcPr calcId=\"124519\" fullCalcOnLoad=\"1\" /></workbook>"
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_174036.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_174036.xlsx",
+      "file_size": 6597,
+      "analysis_date": "2025-07-14T11:47:46.161187",
+      "sheets": {},
+      "shared_strings": [],
+      "worksheets_analysis": {
+        "sheet1": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Référence du texte",
+            "Titre du texte",
+            "Date de parution",
+            "Date d'entrée en vigueur",
+            "Résumé du contenu",
+            "Obligations opérationnelles",
+            "Articles de référence",
+            "Sanctions prévues",
+            "Impact/poids sur une banque",
+            "R-2020/03"
+          ],
+          "dimension": "A1:I27",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:I27\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"20\" customWidth=\"1\" min=\"1\" max=\"1\" /><col"
+        }
+      },
+      "sheet_names": [
+        "Cartographie_Reglementaire"
+      ],
+      "workbook_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets><definedNames><definedName name=\"_xlnm._FilterDatabase\" localSheetId=\"0\" hidden=\"1\">'Cartographie_Reglementaire'!$A$1:$I$27</definedName></definedNames><calcPr calcId=\"124519\" fullCalcOnLoad=\"1\" /></workbook>"
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250713_221844.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250713_221844.xlsx",
+      "file_size": 23929,
+      "analysis_date": "2025-07-14T11:47:46.184845",
+      "sheets": {},
+      "shared_strings": [],
+      "worksheets_analysis": {
+        "sheet1": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Référence du texte",
+            "Titre du texte",
+            "Date de parution",
+            "Date d'entrée en vigueur",
+            "Résumé du contenu",
+            "Obligations opérationnelles",
+            "Articles de référence",
+            "Sanctions prévues",
+            "Impact/poids sur une banque",
+            "I_ ORGANISATION ET FONCTIONNEMENT DE LA COBAC"
+          ],
+          "dimension": "A1:I92",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:I92\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"20\" customWidth=\"1\" min=\"1\" max=\"1\" /><col"
+        }
+      },
+      "sheet_names": [
+        "Cartographie_Reglementaire"
+      ],
+      "workbook_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets><definedNames><definedName name=\"_xlnm._FilterDatabase\" localSheetId=\"0\" hidden=\"1\">'Cartographie_Reglementaire'!$A$1:$I$92</definedName></definedNames><calcPr calcId=\"124519\" fullCalcOnLoad=\"1\" /></workbook>"
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250714_095714.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250714_095714.xlsx",
+      "file_size": 31829,
+      "analysis_date": "2025-07-14T11:47:46.205166",
+      "sheets": {},
+      "shared_strings": [],
+      "worksheets_analysis": {
+        "sheet1": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Référence du texte",
+            "Titre du texte",
+            "Date de parution",
+            "Date d'entrée en vigueur",
+            "Résumé du contenu",
+            "Obligations opérationnelles",
+            "Articles de référence",
+            "Sanctions prévues",
+            "Impact/poids sur une banque",
+            "I_ ORGANISATION ET FONCTIONNEMENT DE LA COBAC"
+          ],
+          "dimension": "A1:I126",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:I126\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"20\" customWidth=\"1\" min=\"1\" max=\"1\" /><co"
+        }
+      },
+      "sheet_names": [
+        "Cartographie_Reglementaire"
+      ],
+      "workbook_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets><definedNames><definedName name=\"_xlnm._FilterDatabase\" localSheetId=\"0\" hidden=\"1\">'Cartographie_Reglementaire'!$A$1:$I$126</definedName></definedNames><calcPr calcId=\"124519\" fullCalcOnLoad=\"1\" /></workbook>"
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_191639.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_191639.xlsx",
+      "file_size": 11731,
+      "analysis_date": "2025-07-14T11:47:46.246926",
+      "sheets": {},
+      "shared_strings": [],
+      "worksheets_analysis": {
+        "sheet1": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Référence du texte",
+            "Titre du texte",
+            "Date de parution",
+            "Date d'entrée en vigueur",
+            "Résumé du contenu",
+            "Obligations opérationnelles",
+            "Articles de référence",
+            "Sanctions prévues",
+            "Impact/poids sur une banque",
+            "I_ ORGANISATION ET FONCTIONNEMENT DE LA COBAC"
+          ],
+          "dimension": "A1:I92",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:I92\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"20\" customWidth=\"1\" min=\"1\" max=\"1\" /><col"
+        }
+      },
+      "sheet_names": [
+        "Cartographie_Reglementaire"
+      ],
+      "workbook_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets><definedNames><definedName name=\"_xlnm._FilterDatabase\" localSheetId=\"0\" hidden=\"1\">'Cartographie_Reglementaire'!$A$1:$I$92</definedName></definedNames><calcPr calcId=\"124519\" fullCalcOnLoad=\"1\" /></workbook>"
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_194758.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_194758.xlsx",
+      "file_size": 11688,
+      "analysis_date": "2025-07-14T11:47:46.269100",
+      "sheets": {},
+      "shared_strings": [],
+      "worksheets_analysis": {
+        "sheet1": {
+          "shared_string_refs": [],
+          "direct_values": [
+            "Référence du texte",
+            "Titre du texte",
+            "Date de parution",
+            "Date d'entrée en vigueur",
+            "Résumé du contenu",
+            "Obligations opérationnelles",
+            "Articles de référence",
+            "Sanctions prévues",
+            "Impact/poids sur une banque",
+            "I_ ORGANISATION ET FONCTIONNEMENT DE LA COBAC"
+          ],
+          "dimension": "A1:I92",
+          "content_sample": "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetPr><outlinePr summaryBelow=\"1\" summaryRight=\"1\" /><pageSetUpPr /></sheetPr><dimension ref=\"A1:I92\" /><sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\" /><selection pane=\"bottomLeft\" activeCell=\"A1\" sqref=\"A1\" /></sheetView></sheetViews><sheetFormatPr baseColWidth=\"8\" defaultRowHeight=\"15\" /><cols><col width=\"20\" customWidth=\"1\" min=\"1\" max=\"1\" /><col"
+        }
+      },
+      "sheet_names": [
+        "Cartographie_Reglementaire"
+      ],
+      "workbook_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets><definedNames><definedName name=\"_xlnm._FilterDatabase\" localSheetId=\"0\" hidden=\"1\">'Cartographie_Reglementaire'!$A$1:$I$92</definedName></definedNames><calcPr calcId=\"124519\" fullCalcOnLoad=\"1\" /></workbook>"
+    }
+  ],
+  "comparison_with_reference": {
+    "reference_file": "cartographie_reglementaire_v4.xlsx",
+    "reference_sheets": [
+      "I",
+      "II",
+      "III",
+      "IV",
+      "V",
+      "VI",
+      "VII",
+      "VIII",
+      "IX"
+    ],
+    "reference_shared_strings": [
+      "Référence du texte",
+      "Date de parution",
+      "Date d'entrée en vigueur",
+      "Résumé du contenu",
+      "Obligations opérationnelles",
+      "Articles de référence",
+      "Sanctions prévues",
+      "Impact/poids sur une banque",
+      "I_ ORGANISATION ET FONCTIONNEMENT  De LA COBAC",
+      "V-1_Regime general"
+    ],
+    "comparisons": [
+      {
+        "file_name": "cartographie_reglementaire_Doupamby_Nyamat_20250714_104522.xlsx",
+        "file_size": 31603,
+        "sheet_names": [
+          "Cartographie_Reglementaire"
+        ],
+        "sheets_match": false,
+        "shared_strings_sample": [],
+        "missing_sheets": [
+          "I",
+          "VII",
+          "VI",
+          "V",
+          "III",
+          "VIII",
+          "II",
+          "IX",
+          "IV"
+        ],
+        "extra_sheets": [
+          "Cartographie_Reglementaire"
+        ],
+        "similar_strings": [],
+        "different_strings": []
+      },
+      {
+        "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva.xlsx",
+        "file_size": 23785,
+        "sheet_names": [
+          "Cartographie_Reglementaire"
+        ],
+        "sheets_match": false,
+        "shared_strings_sample": [],
+        "missing_sheets": [
+          "I",
+          "VII",
+          "VI",
+          "V",
+          "III",
+          "VIII",
+          "II",
+          "IX",
+          "IV"
+        ],
+        "extra_sheets": [
+          "Cartographie_Reglementaire"
+        ],
+        "similar_strings": [],
+        "different_strings": []
+      },
+      {
+        "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_173703.xlsx",
+        "file_size": 13518,
+        "sheet_names": [
+          "Document_Metadata",
+          "Data",
+          "Validation_Results",
+          "Statistics",
+          "Summary"
+        ],
+        "sheets_match": false,
+        "shared_strings_sample": [],
+        "missing_sheets": [
+          "I",
+          "VII",
+          "VI",
+          "V",
+          "III",
+          "VIII",
+          "II",
+          "IX",
+          "IV"
+        ],
+        "extra_sheets": [
+          "Document_Metadata",
+          "Data",
+          "Statistics",
+          "Validation_Results",
+          "Summary"
+        ],
+        "similar_strings": [],
+        "different_strings": []
+      },
+      {
+        "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_174036.xlsx",
+        "file_size": 6597,
+        "sheet_names": [
+          "Cartographie_Reglementaire"
+        ],
+        "sheets_match": false,
+        "shared_strings_sample": [],
+        "missing_sheets": [
+          "I",
+          "VII",
+          "VI",
+          "V",
+          "III",
+          "VIII",
+          "II",
+          "IX",
+          "IV"
+        ],
+        "extra_sheets": [
+          "Cartographie_Reglementaire"
+        ],
+        "similar_strings": [],
+        "different_strings": []
+      },
+      {
+        "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250713_221844.xlsx",
+        "file_size": 23929,
+        "sheet_names": [
+          "Cartographie_Reglementaire"
+        ],
+        "sheets_match": false,
+        "shared_strings_sample": [],
+        "missing_sheets": [
+          "I",
+          "VII",
+          "VI",
+          "V",
+          "III",
+          "VIII",
+          "II",
+          "IX",
+          "IV"
+        ],
+        "extra_sheets": [
+          "Cartographie_Reglementaire"
+        ],
+        "similar_strings": [],
+        "different_strings": []
+      },
+      {
+        "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250714_095714.xlsx",
+        "file_size": 31829,
+        "sheet_names": [
+          "Cartographie_Reglementaire"
+        ],
+        "sheets_match": false,
+        "shared_strings_sample": [],
+        "missing_sheets": [
+          "I",
+          "VII",
+          "VI",
+          "V",
+          "III",
+          "VIII",
+          "II",
+          "IX",
+          "IV"
+        ],
+        "extra_sheets": [
+          "Cartographie_Reglementaire"
+        ],
+        "similar_strings": [],
+        "different_strings": []
+      },
+      {
+        "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_191639.xlsx",
+        "file_size": 11731,
+        "sheet_names": [
+          "Cartographie_Reglementaire"
+        ],
+        "sheets_match": false,
+        "shared_strings_sample": [],
+        "missing_sheets": [
+          "I",
+          "VII",
+          "VI",
+          "V",
+          "III",
+          "VIII",
+          "II",
+          "IX",
+          "IV"
+        ],
+        "extra_sheets": [
+          "Cartographie_Reglementaire"
+        ],
+        "similar_strings": [],
+        "different_strings": []
+      },
+      {
+        "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_194758.xlsx",
+        "file_size": 11688,
+        "sheet_names": [
+          "Cartographie_Reglementaire"
+        ],
+        "sheets_match": false,
+        "shared_strings_sample": [],
+        "missing_sheets": [
+          "I",
+          "VII",
+          "VI",
+          "V",
+          "III",
+          "VIII",
+          "II",
+          "IX",
+          "IV"
+        ],
+        "extra_sheets": [
+          "Cartographie_Reglementaire"
+        ],
+        "similar_strings": [],
+        "different_strings": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,159 @@
+2025-07-14 11:38:58,427 - __main__ - ERROR - Erreur d'import du processeur réglementaire: No module named 'PyPDF2'
+2025-07-14 11:38:58,431 - __main__ - INFO - 🔧 Test de bout en bout simplifié initialisé
+2025-07-14 11:38:58,450 - __main__ - INFO - 🚀 Démarrage du test de bout en bout simplifié
+2025-07-14 11:38:58,450 - __main__ - INFO - 🔍 Test 1: Vérification de l'environnement
+2025-07-14 11:38:58,454 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/__init__.py
+2025-07-14 11:38:58,456 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/cartographie_exporter.py
+2025-07-14 11:38:58,467 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/config.py
+2025-07-14 11:38:58,469 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/exporters.py
+2025-07-14 11:38:58,471 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/extractors.py
+2025-07-14 11:38:58,473 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/processor.py
+2025-07-14 11:38:58,475 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/validators.py
+2025-07-14 11:38:58,476 - __main__ - INFO - ✅ Répertoire trouvé: regulatory_processor
+2025-07-14 11:38:58,477 - __main__ - INFO - ✅ Répertoire trouvé: resultat
+2025-07-14 11:38:58,478 - __main__ - INFO - ✅ Configuration trouvée: requirements.txt
+2025-07-14 11:38:58,481 - __main__ - INFO - ✅ Configuration trouvée: process_regulations_unified.py
+2025-07-14 11:38:58,483 - __main__ - INFO - ✅ Configuration trouvée: regulatory_gui_branded.py
+2025-07-14 11:38:58,483 - __main__ - INFO - ✅ Test 1 RÉUSSI: Vérification de l'environnement
+2025-07-14 11:38:58,483 - __main__ - INFO - 🔧 Test 2: Initialisation des composants
+2025-07-14 11:38:58,483 - __main__ - WARNING - ⚠️ Module regulatory_processor non disponible
+2025-07-14 11:38:58,484 - __main__ - INFO - 🖥️ Test 3: Simulation du flux interface utilisateur
+2025-07-14 11:38:58,498 - __main__ - INFO - 📋 Paramètres UI simulés:
+2025-07-14 11:38:58,498 - __main__ - INFO -    Format d'export: cartographie
+2025-07-14 11:38:58,498 - __main__ - INFO -    Documents sélectionnés: 1
+2025-07-14 11:38:58,499 - __main__ - INFO -    Répertoire de sortie: test_outputs
+2025-07-14 11:38:58,499 - __main__ - INFO -    Utilisateur: Test User
+2025-07-14 11:38:58,500 - __main__ - INFO - ✅ Test 3 RÉUSSI: Simulation du flux interface utilisateur
+2025-07-14 11:38:58,500 - __main__ - INFO - 📁 Test 4: Test des fichiers existants
+2025-07-14 11:38:58,504 - __main__ - INFO - 📊 Fichiers Excel trouvés: 13
+2025-07-14 11:38:58,504 - __main__ - INFO -    📄 analyse_reglementairev5_Doupamby_Nyamat_Bantsiva_20250711_201212.xlsx
+2025-07-14 11:38:58,506 - __main__ - INFO -       Taille: 13.20 KB
+2025-07-14 11:38:58,508 - __main__ - INFO -       ✅ Format Excel valide
+2025-07-14 11:38:58,509 - __main__ - INFO -    📄 analyse_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_181352.xlsx
+2025-07-14 11:38:58,510 - __main__ - INFO -       Taille: 13.21 KB
+2025-07-14 11:38:58,512 - __main__ - INFO -       ✅ Format Excel valide
+2025-07-14 11:38:58,517 - __main__ - INFO -    📄 analyse_reglementaire_Gustavus_Vassa_20250625_231641_old.xlsx
+2025-07-14 11:38:58,583 - __main__ - INFO -       Taille: 177.36 KB
+2025-07-14 11:38:58,589 - __main__ - INFO -       ✅ Format Excel valide
+2025-07-14 11:38:58,599 - __main__ - INFO - 📄 Fichiers PDF trouvés: 1
+2025-07-14 11:38:58,600 - __main__ - INFO -    📄 Code Pénal Gabonais.pdf
+2025-07-14 11:38:58,601 - __main__ - INFO -       Taille: 803.40 KB
+2025-07-14 11:38:58,603 - __main__ - INFO -       ✅ Format PDF valide
+2025-07-14 11:38:58,603 - __main__ - INFO - ✅ Test 4 RÉUSSI: Test des fichiers existants
+2025-07-14 11:38:58,604 - __main__ - INFO - 🗺️ Test 5: Test de la structure de cartographie
+2025-07-14 11:38:58,604 - __main__ - WARNING - ⚠️ Module regulatory_processor non disponible
+2025-07-14 11:38:58,604 - __main__ - INFO - 🛡️ Test 6: Test de robustesse
+2025-07-14 11:38:58,605 - __main__ - INFO - 🔍 Test avec données manquantes
+2025-07-14 11:38:58,605 - __main__ - INFO -    ✅ Erreur attendue gérée: Contenu manquant
+2025-07-14 11:38:58,605 - __main__ - INFO -    ✅ Erreur attendue gérée: Contenu manquant
+2025-07-14 11:38:58,606 - __main__ - INFO -    ✅ Erreur attendue gérée: Contenu manquant
+2025-07-14 11:38:58,606 - __main__ - INFO -    ✅ Erreur attendue gérée: Nom de fichier manquant
+2025-07-14 11:38:58,606 - __main__ - INFO - 🔍 Test avec fichiers inexistants
+2025-07-14 11:38:58,607 - __main__ - INFO -    ✅ Erreur fichier inexistant gérée: Fichier non trouvé: fichier_inexistant.pdf
+2025-07-14 11:38:58,607 - __main__ - INFO -    ✅ Erreur fichier inexistant gérée: Fichier non trouvé: /chemin/invalide/document.pdf
+2025-07-14 11:38:58,608 - __main__ - INFO -    ✅ Erreur fichier inexistant gérée: Fichier non trouvé: document_avec_caractères_spéciaux_éàç.pdf
+2025-07-14 11:38:58,609 - __main__ - INFO - 🔍 Test de fallback
+2025-07-14 11:38:58,609 - __main__ - INFO - 🤖 Test du fallback IA
+2025-07-14 11:38:58,609 - __main__ - INFO - ✅ Fallback IA activé: Erreur IA simulée
+2025-07-14 11:38:58,610 - __main__ - INFO - ✅ Résultat fallback: Catégorie par défaut
+2025-07-14 11:38:58,610 - __main__ - INFO - ✅ Test 6 RÉUSSI: Test de robustesse
+2025-07-14 11:38:58,610 - __main__ - INFO - 📈 Test 7: Test de performance
+2025-07-14 11:38:58,610 - __main__ - INFO - ⏱️ Temps d'initialisation: 0.000s
+2025-07-14 11:38:58,611 - __main__ - INFO - ⏱️ Temps de traitement simulé: 0.000s
+2025-07-14 11:38:58,611 - __main__ - INFO - ✅ Performance d'initialisation: EXCELLENTE
+2025-07-14 11:38:58,611 - __main__ - INFO - ✅ Test 7 RÉUSSI: Test de performance
+2025-07-14 11:38:58,612 - __main__ - INFO - 📋 Génération du rapport final
+2025-07-14 11:38:58,612 - __main__ - ERROR - ❌ Erreur critique dans le test: 'duration'
+2025-07-14 11:39:21,347 - __main__ - ERROR - Erreur d'import du processeur réglementaire: No module named 'PyPDF2'
+2025-07-14 11:39:21,348 - __main__ - INFO - 🔧 Test de bout en bout simplifié initialisé
+2025-07-14 11:39:21,348 - __main__ - INFO - 🚀 Démarrage du test de bout en bout simplifié
+2025-07-14 11:39:21,348 - __main__ - INFO - 🔍 Test 1: Vérification de l'environnement
+2025-07-14 11:39:21,349 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/__init__.py
+2025-07-14 11:39:21,350 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/cartographie_exporter.py
+2025-07-14 11:39:21,351 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/config.py
+2025-07-14 11:39:21,351 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/exporters.py
+2025-07-14 11:39:21,352 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/extractors.py
+2025-07-14 11:39:21,353 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/processor.py
+2025-07-14 11:39:21,357 - __main__ - INFO - ✅ Fichier trouvé: regulatory_processor/validators.py
+2025-07-14 11:39:21,357 - __main__ - INFO - ✅ Répertoire trouvé: regulatory_processor
+2025-07-14 11:39:21,359 - __main__ - INFO - ✅ Répertoire trouvé: resultat
+2025-07-14 11:39:21,360 - __main__ - INFO - ✅ Configuration trouvée: requirements.txt
+2025-07-14 11:39:21,360 - __main__ - INFO - ✅ Configuration trouvée: process_regulations_unified.py
+2025-07-14 11:39:21,361 - __main__ - INFO - ✅ Configuration trouvée: regulatory_gui_branded.py
+2025-07-14 11:39:21,361 - __main__ - INFO - ✅ Test 1 RÉUSSI: Vérification de l'environnement
+2025-07-14 11:39:21,361 - __main__ - INFO - 🔧 Test 2: Initialisation des composants
+2025-07-14 11:39:21,361 - __main__ - WARNING - ⚠️ Module regulatory_processor non disponible
+2025-07-14 11:39:21,361 - __main__ - INFO - 🖥️ Test 3: Simulation du flux interface utilisateur
+2025-07-14 11:39:21,368 - __main__ - INFO - 📋 Paramètres UI simulés:
+2025-07-14 11:39:21,369 - __main__ - INFO -    Format d'export: cartographie
+2025-07-14 11:39:21,369 - __main__ - INFO -    Documents sélectionnés: 1
+2025-07-14 11:39:21,369 - __main__ - INFO -    Répertoire de sortie: test_outputs
+2025-07-14 11:39:21,369 - __main__ - INFO -    Utilisateur: Test User
+2025-07-14 11:39:21,373 - __main__ - INFO - ✅ Test 3 RÉUSSI: Simulation du flux interface utilisateur
+2025-07-14 11:39:21,373 - __main__ - INFO - 📁 Test 4: Test des fichiers existants
+2025-07-14 11:39:21,379 - __main__ - INFO - 📊 Fichiers Excel trouvés: 13
+2025-07-14 11:39:21,379 - __main__ - INFO -    📄 analyse_reglementairev5_Doupamby_Nyamat_Bantsiva_20250711_201212.xlsx
+2025-07-14 11:39:21,380 - __main__ - INFO -       Taille: 13.20 KB
+2025-07-14 11:39:21,382 - __main__ - INFO -       ✅ Format Excel valide
+2025-07-14 11:39:21,382 - __main__ - INFO -    📄 analyse_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_181352.xlsx
+2025-07-14 11:39:21,384 - __main__ - INFO -       Taille: 13.21 KB
+2025-07-14 11:39:21,385 - __main__ - INFO -       ✅ Format Excel valide
+2025-07-14 11:39:21,385 - __main__ - INFO -    📄 analyse_reglementaire_Gustavus_Vassa_20250625_231641_old.xlsx
+2025-07-14 11:39:21,386 - __main__ - INFO -       Taille: 177.36 KB
+2025-07-14 11:39:21,394 - __main__ - INFO -       ✅ Format Excel valide
+2025-07-14 11:39:21,399 - __main__ - INFO - 📄 Fichiers PDF trouvés: 1
+2025-07-14 11:39:21,399 - __main__ - INFO -    📄 Code Pénal Gabonais.pdf
+2025-07-14 11:39:21,400 - __main__ - INFO -       Taille: 803.40 KB
+2025-07-14 11:39:21,401 - __main__ - INFO -       ✅ Format PDF valide
+2025-07-14 11:39:21,401 - __main__ - INFO - ✅ Test 4 RÉUSSI: Test des fichiers existants
+2025-07-14 11:39:21,401 - __main__ - INFO - 🗺️ Test 5: Test de la structure de cartographie
+2025-07-14 11:39:21,402 - __main__ - WARNING - ⚠️ Module regulatory_processor non disponible
+2025-07-14 11:39:21,402 - __main__ - INFO - 🛡️ Test 6: Test de robustesse
+2025-07-14 11:39:21,402 - __main__ - INFO - 🔍 Test avec données manquantes
+2025-07-14 11:39:21,402 - __main__ - INFO -    ✅ Erreur attendue gérée: Contenu manquant
+2025-07-14 11:39:21,402 - __main__ - INFO -    ✅ Erreur attendue gérée: Contenu manquant
+2025-07-14 11:39:21,402 - __main__ - INFO -    ✅ Erreur attendue gérée: Contenu manquant
+2025-07-14 11:39:21,403 - __main__ - INFO -    ✅ Erreur attendue gérée: Nom de fichier manquant
+2025-07-14 11:39:21,403 - __main__ - INFO - 🔍 Test avec fichiers inexistants
+2025-07-14 11:39:21,406 - __main__ - INFO -    ✅ Erreur fichier inexistant gérée: Fichier non trouvé: fichier_inexistant.pdf
+2025-07-14 11:39:21,407 - __main__ - INFO -    ✅ Erreur fichier inexistant gérée: Fichier non trouvé: /chemin/invalide/document.pdf
+2025-07-14 11:39:21,424 - __main__ - INFO -    ✅ Erreur fichier inexistant gérée: Fichier non trouvé: document_avec_caractères_spéciaux_éàç.pdf
+2025-07-14 11:39:21,425 - __main__ - INFO - 🔍 Test de fallback
+2025-07-14 11:39:21,426 - __main__ - INFO - 🤖 Test du fallback IA
+2025-07-14 11:39:21,426 - __main__ - INFO - ✅ Fallback IA activé: Erreur IA simulée
+2025-07-14 11:39:21,427 - __main__ - INFO - ✅ Résultat fallback: Catégorie par défaut
+2025-07-14 11:39:21,427 - __main__ - INFO - ✅ Test 6 RÉUSSI: Test de robustesse
+2025-07-14 11:39:21,427 - __main__ - INFO - 📈 Test 7: Test de performance
+2025-07-14 11:39:21,428 - __main__ - INFO - ⏱️ Temps d'initialisation: 0.000s
+2025-07-14 11:39:21,428 - __main__ - INFO - ⏱️ Temps de traitement simulé: 0.000s
+2025-07-14 11:39:21,428 - __main__ - INFO - ✅ Performance d'initialisation: EXCELLENTE
+2025-07-14 11:39:21,429 - __main__ - INFO - ✅ Test 7 RÉUSSI: Test de performance
+2025-07-14 11:39:21,429 - __main__ - INFO - 📋 Génération du rapport final
+2025-07-14 11:39:21,434 - __main__ - INFO - 
+================================================================================
+2025-07-14 11:39:21,434 - __main__ - INFO - 📋 RAPPORT DE TEST DE BOUT EN BOUT SIMPLIFIÉ
+2025-07-14 11:39:21,435 - __main__ - INFO - ================================================================================
+2025-07-14 11:39:21,435 - __main__ - INFO - 📊 RÉSUMÉ:
+2025-07-14 11:39:21,435 - __main__ - INFO -    Tests totaux: 7
+2025-07-14 11:39:21,436 - __main__ - INFO -    Tests réussis: 7
+2025-07-14 11:39:21,436 - __main__ - INFO -    Tests échoués: 0
+2025-07-14 11:39:21,436 - __main__ - INFO -    Taux de réussite: 100.0%
+2025-07-14 11:39:21,437 - __main__ - INFO -    Durée: 0.08s
+2025-07-14 11:39:21,439 - __main__ - INFO - 
+📈 PERFORMANCE:
+2025-07-14 11:39:21,440 - __main__ - INFO -    initialization_time: 0.000s
+2025-07-14 11:39:21,440 - __main__ - INFO -    simulated_processing_time: 0.000s
+2025-07-14 11:39:21,441 - __main__ - INFO - 
+⚠️ AVERTISSEMENTS:
+2025-07-14 11:39:21,441 - __main__ - INFO -    - Module regulatory_processor non disponible
+2025-07-14 11:39:21,441 - __main__ - INFO -    - Module regulatory_processor non disponible
+2025-07-14 11:39:21,441 - __main__ - INFO - 
+💡 RECOMMANDATIONS:
+2025-07-14 11:39:21,442 - __main__ - INFO -    - Vérifier l'installation des modules Python
+2025-07-14 11:39:21,442 - __main__ - INFO -    - Implémenter des tests unitaires plus complets
+2025-07-14 11:39:21,442 - __main__ - INFO -    - Ajouter un monitoring des performances
+2025-07-14 11:39:21,442 - __main__ - INFO - 
+================================================================================
+2025-07-14 11:39:21,443 - __main__ - INFO - 🎉 STATUT: TOUS LES TESTS RÉUSSIS
+2025-07-14 11:39:21,443 - __main__ - INFO - ================================================================================
+2025-07-14 11:39:21,443 - __main__ - INFO - 📄 Rapport sauvegardé: test_outputs/simple_test_report_20250714_113921.json

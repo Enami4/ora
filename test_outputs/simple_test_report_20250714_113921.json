@@ -1,0 +1,24 @@
+{
+  "test_summary": {
+    "total_tests": 7,
+    "tests_passed": 7,
+    "tests_failed": 0,
+    "success_rate": 100.0
+  },
+  "duration": 0.082351,
+  "components_tested": [],
+  "performance_metrics": {
+    "initialization_time": 7.152557373046875e-07,
+    "simulated_processing_time": 5.221366882324219e-05
+  },
+  "errors": [],
+  "warnings": [
+    "Module regulatory_processor non disponible",
+    "Module regulatory_processor non disponible"
+  ],
+  "recommendations": [
+    "Vérifier l'installation des modules Python",
+    "Implémenter des tests unitaires plus complets",
+    "Ajouter un monitoring des performances"
+  ]
+}

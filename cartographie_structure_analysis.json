@@ -1,0 +1,259 @@
+{
+  "analysis_date": "2025-07-14T11:46:40.908467",
+  "total_files_analyzed": 9,
+  "individual_analyses": [
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/cartographie_reglementaire_v4.xlsx",
+      "file_name": "cartographie_reglementaire_v4.xlsx",
+      "file_size": 54036,
+      "analysis_date": "2025-07-14T11:46:40.877721",
+      "sheets": [
+        "sheet4",
+        "sheet1",
+        "sheet3",
+        "sheet2",
+        "sheet9",
+        "sheet5",
+        "sheet6",
+        "sheet7",
+        "sheet8"
+      ],
+      "relationships": [],
+      "workbook_content_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x15\" xmlns:x15=\"http://schemas.microsoft.com/office/spreadsheetml/2010/11/main\"><fileVersion appName=\"xl\" lastEdited=\"6\" lowestEdited=\"5\" rupBuild=\"14420\"/><workbookPr/><mc:AlternateContent xmlns:mc=\"http",
+      "shared_strings_sample": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<sst xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" count=\"874\" uniqueCount=\"660\"><si><t>Référence du texte</t></si><si><t>Date de parution</t></si><si><t>Date d'entrée en vigueur</t></si><si><t>Résumé du contenu</t></si><si><t>Obligations opérationnelles</t></si><si><t>Articles de référence</t></si><si><t>Sanctions prévues</t></si><si><t>Impact/poids sur une banque</t></si><si><t>I_ ORGANISATION ET FONCTIONNEMENT  De LA",
+      "zip_structure": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "xl/_rels/workbook.xml.rels",
+        "xl/workbook.xml",
+        "xl/worksheets/sheet4.xml",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/sheet3.xml",
+        "xl/worksheets/sheet2.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/styles.xml",
+        "xl/sharedStrings.xml",
+        "xl/worksheets/sheet9.xml",
+        "xl/worksheets/sheet5.xml",
+        "xl/worksheets/sheet6.xml",
+        "xl/worksheets/sheet7.xml",
+        "xl/theme/theme1.xml",
+        "xl/worksheets/sheet8.xml",
+        "docProps/custom.xml",
+        "xl/printerSettings/printerSettings1.bin",
+        "docProps/core.xml",
+        "docProps/app.xml",
+        "xl/customStorage/customStorage.xml"
+      ]
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_20250714_104522.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_20250714_104522.xlsx",
+      "file_size": 31603,
+      "analysis_date": "2025-07-14T11:46:40.882355",
+      "sheets": [
+        "sheet1"
+      ],
+      "relationships": [],
+      "workbook_content_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets",
+      "zip_structure": [
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "xl/theme/theme1.xml",
+        "xl/worksheets/sheet1.xml",
+        "xl/styles.xml",
+        "_rels/.rels",
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "[Content_Types].xml"
+      ],
+      "actual_sheet_names": [
+        "Cartographie_Reglementaire"
+      ]
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva.xlsx",
+      "file_size": 23785,
+      "analysis_date": "2025-07-14T11:46:40.885480",
+      "sheets": [
+        "sheet1"
+      ],
+      "relationships": [],
+      "workbook_content_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets",
+      "zip_structure": [
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "xl/theme/theme1.xml",
+        "xl/worksheets/sheet1.xml",
+        "xl/styles.xml",
+        "_rels/.rels",
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "[Content_Types].xml"
+      ],
+      "actual_sheet_names": [
+        "Cartographie_Reglementaire"
+      ]
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_173703.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_173703.xlsx",
+      "file_size": 13518,
+      "analysis_date": "2025-07-14T11:46:40.888561",
+      "sheets": [
+        "sheet1",
+        "sheet2",
+        "sheet3",
+        "sheet4",
+        "sheet5"
+      ],
+      "relationships": [],
+      "workbook_content_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Document_Metadata\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /><sheet name=\"Data",
+      "zip_structure": [
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "xl/theme/theme1.xml",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/sheet2.xml",
+        "xl/worksheets/sheet3.xml",
+        "xl/worksheets/sheet4.xml",
+        "xl/worksheets/sheet5.xml",
+        "xl/styles.xml",
+        "_rels/.rels",
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "[Content_Types].xml"
+      ],
+      "actual_sheet_names": [
+        "Document_Metadata"
+      ]
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_174036.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_174036.xlsx",
+      "file_size": 6597,
+      "analysis_date": "2025-07-14T11:46:40.891533",
+      "sheets": [
+        "sheet1"
+      ],
+      "relationships": [],
+      "workbook_content_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets",
+      "zip_structure": [
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "xl/theme/theme1.xml",
+        "xl/worksheets/sheet1.xml",
+        "xl/styles.xml",
+        "_rels/.rels",
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "[Content_Types].xml"
+      ],
+      "actual_sheet_names": [
+        "Cartographie_Reglementaire"
+      ]
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250713_221844.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250713_221844.xlsx",
+      "file_size": 23929,
+      "analysis_date": "2025-07-14T11:46:40.894756",
+      "sheets": [
+        "sheet1"
+      ],
+      "relationships": [],
+      "workbook_content_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets",
+      "zip_structure": [
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "xl/theme/theme1.xml",
+        "xl/worksheets/sheet1.xml",
+        "xl/styles.xml",
+        "_rels/.rels",
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "[Content_Types].xml"
+      ],
+      "actual_sheet_names": [
+        "Cartographie_Reglementaire"
+      ]
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250714_095714.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250714_095714.xlsx",
+      "file_size": 31829,
+      "analysis_date": "2025-07-14T11:46:40.899420",
+      "sheets": [
+        "sheet1"
+      ],
+      "relationships": [],
+      "workbook_content_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets",
+      "zip_structure": [
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "xl/theme/theme1.xml",
+        "xl/worksheets/sheet1.xml",
+        "xl/styles.xml",
+        "_rels/.rels",
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "[Content_Types].xml"
+      ],
+      "actual_sheet_names": [
+        "Cartographie_Reglementaire"
+      ]
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_191639.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_191639.xlsx",
+      "file_size": 11731,
+      "analysis_date": "2025-07-14T11:46:40.902405",
+      "sheets": [
+        "sheet1"
+      ],
+      "relationships": [],
+      "workbook_content_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets",
+      "zip_structure": [
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "xl/theme/theme1.xml",
+        "xl/worksheets/sheet1.xml",
+        "xl/styles.xml",
+        "_rels/.rels",
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "[Content_Types].xml"
+      ],
+      "actual_sheet_names": [
+        "Cartographie_Reglementaire"
+      ]
+    },
+    {
+      "file_path": "/mnt/c/Users/doupa/Desktop/Ventures/Orabank/resultat/cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_194758.xlsx",
+      "file_name": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_194758.xlsx",
+      "file_size": 11688,
+      "analysis_date": "2025-07-14T11:46:40.906155",
+      "sheets": [
+        "sheet1"
+      ],
+      "relationships": [],
+      "workbook_content_sample": "<workbook xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><workbookPr /><workbookProtection /><bookViews><workbookView visibility=\"visible\" minimized=\"0\" showHorizontalScroll=\"1\" showVerticalScroll=\"1\" showSheetTabs=\"1\" tabRatio=\"600\" firstSheet=\"0\" activeTab=\"0\" autoFilterDateGrouping=\"1\" /></bookViews><sheets><sheet name=\"Cartographie_Reglementaire\" sheetId=\"1\" state=\"visible\" r:id=\"rId1\" /></sheets",
+      "zip_structure": [
+        "docProps/app.xml",
+        "docProps/core.xml",
+        "xl/theme/theme1.xml",
+        "xl/worksheets/sheet1.xml",
+        "xl/styles.xml",
+        "_rels/.rels",
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "[Content_Types].xml"
+      ],
+      "actual_sheet_names": [
+        "Cartographie_Reglementaire"
+      ]
+    }
+  ],
+  "reference_file": "cartographie_reglementaire_v4.xlsx"
+}

@@ -12,6 +12,15 @@ from pathlib import Path
 import chardet
 from .caching import cache_result, get_cache
 from .error_recovery import with_retry, with_fallback, get_error_manager
+from .page_selector import PageSelection, PageRangeParser
+
+# Import enhanced OCR components
+try:
+    from .enhanced_ocr import EnhancedOCRProcessor, OCRConfig
+    HAS_ENHANCED_OCR = True
+except ImportError:
+    HAS_ENHANCED_OCR = False
+    logger.warning("Enhanced OCR not available, using basic OCR")
 
 # Optional advanced extraction libraries
 try:
@@ -56,7 +65,20 @@ if not HAS_TABULA:
 class PDFExtractor:
     """Handles PDF text extraction with multiple fallback methods."""
     
-    def __init__(self):
+    def __init__(self, use_enhanced_ocr: bool = True):
+        self.use_enhanced_ocr = use_enhanced_ocr and HAS_ENHANCED_OCR
+        
+        # Initialize enhanced OCR processor if available
+        if self.use_enhanced_ocr:
+            self.enhanced_ocr = EnhancedOCRProcessor(OCRConfig(
+                target_dpi=300,
+                languages='fra+eng',
+                confidence_threshold=0.6,
+                use_preprocessing=True,
+                use_postprocessing=True
+            ))
+            logger.info("Enhanced OCR processor initialized")
+        
         self.extraction_methods = [
             self._extract_with_pdfplumber,
             self._extract_with_pypdf2,
@@ -66,7 +88,7 @@ class PDFExtractor:
         if HAS_PDFIUM:
             self.extraction_methods.insert(0, self._extract_with_pdfium)
             
-        if HAS_OCR:
+        if HAS_OCR or self.use_enhanced_ocr:
             self.extraction_methods.append(self._extract_with_ocr)
             
         logger.info(f"PDFExtractor initialized with {len(self.extraction_methods)} extraction methods")
@@ -142,6 +164,308 @@ class PDFExtractor:
         
         return full_text, page_texts
     
+    @cache_result("selective_text_extraction", ttl_hours=48)
+    @with_retry(max_retries=2, base_delay=1.0, retry_exceptions=(OSError, PermissionError))
+    def extract_text_selective(self, pdf_path: str, page_selection: PageSelection) -> Tuple[str, Dict[int, str]]:
+        """
+        Extract text from specific pages of a PDF.
+        
+        Args:
+            pdf_path: Path to the PDF file
+            page_selection: PageSelection object with validated page ranges
+            
+        Returns:
+            Tuple of (full_text, page_texts_dict) with original page numbering
+        """
+        if not os.path.exists(pdf_path):
+            raise FileNotFoundError(f"PDF file not found: {pdf_path}")
+        
+        logger.info(f"Extracting {page_selection.selected_count} pages from {pdf_path}")
+        
+        full_text = ""
+        page_texts = {}
+        
+        # Try standard extraction methods first
+        for method in self.extraction_methods:
+            if method.__name__ == '_extract_with_ocr':
+                continue  # Skip OCR in first pass
+            
+            try:
+                # Extract only selected pages
+                method_name = method.__name__.replace('_extract_with_', '') + '_selective'
+                if hasattr(self, f'_{method_name}'):
+                    selective_method = getattr(self, f'_{method_name}')
+                    full_text, page_texts = selective_method(pdf_path, page_selection)
+                else:
+                    # Fallback to extracting all and filtering
+                    all_text, all_pages = method(pdf_path)
+                    full_text, page_texts = self._filter_pages(all_pages, page_selection)
+                
+                if full_text.strip() and self.validate_extraction(full_text):
+                    logger.info(f"Successfully extracted selected pages using {method.__name__}")
+                    
+                    # Check if we should enhance with OCR for missing pages in selection
+                    if HAS_OCR and self._should_enhance_with_ocr_selective(full_text, page_texts, page_selection):
+                        logger.info("Enhancing selective extraction with OCR for potentially missing content")
+                        try:
+                            ocr_full_text, ocr_page_texts = self._extract_with_ocr_selective(pdf_path, page_selection)
+                            if ocr_full_text:
+                                full_text, page_texts = self._merge_extractions(
+                                    full_text, page_texts, ocr_full_text, ocr_page_texts
+                                )
+                        except Exception as ocr_error:
+                            logger.warning(f"Selective OCR enhancement failed: {ocr_error}")
+                            # Continue with standard selective extraction
+                    
+                    return full_text, page_texts
+                    
+            except Exception as e:
+                logger.warning(f"Selective extraction with {method.__name__} failed: {e}")
+                continue
+        
+        # If all methods failed, try OCR on selected pages
+        if HAS_OCR and '_extract_with_ocr' in [m.__name__ for m in self.extraction_methods]:
+            logger.info("Attempting OCR extraction for selected pages...")
+            try:
+                full_text, page_texts = self._extract_with_ocr_selective(pdf_path, page_selection)
+                if full_text.strip():
+                    logger.info("Successfully extracted selected pages using OCR")
+                    return full_text, page_texts
+            except Exception as e:
+                logger.error(f"OCR extraction for selected pages failed: {e}")
+        
+        if not full_text.strip():
+            logger.error(f"All extraction methods failed for selected pages in {pdf_path}")
+            return "", {}
+        
+        return full_text, page_texts
+    
+    def _pdfplumber_selective(self, pdf_path: str, page_selection: PageSelection) -> Tuple[str, Dict[int, str]]:
+        """Extract specific pages using pdfplumber."""
+        full_text = ""
+        page_texts = {}
+        
+        try:
+            with pdfplumber.open(pdf_path) as pdf:
+                for page_num in page_selection.selected_pages:
+                    if page_num <= len(pdf.pages):
+                        try:
+                            page = pdf.pages[page_num - 1]  # pdfplumber uses 0-based indexing
+                            page_text = page.extract_text()
+                            if page_text:
+                                page_texts[page_num] = page_text  # Use original page number
+                                full_text += f"\n--- PAGE {page_num} ---\n{page_text}\n\n"
+                        except Exception as e:
+                            logger.warning(f"Failed to extract page {page_num}: {e}")
+                            continue
+        except Exception as e:
+            logger.error(f"pdfplumber selective extraction failed: {e}")
+            raise
+        
+        return full_text.strip(), page_texts
+    
+    def _pypdf2_selective(self, pdf_path: str, page_selection: PageSelection) -> Tuple[str, Dict[int, str]]:
+        """Extract specific pages using PyPDF2."""
+        full_text = ""
+        page_texts = {}
+        
+        try:
+            with open(pdf_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                for page_num in page_selection.selected_pages:
+                    if page_num <= len(pdf_reader.pages):
+                        try:
+                            page = pdf_reader.pages[page_num - 1]  # PyPDF2 uses 0-based indexing
+                            page_text = page.extract_text()
+                            if page_text:
+                                page_texts[page_num] = page_text  # Use original page number
+                                full_text += f"\n--- PAGE {page_num} ---\n{page_text}\n\n"
+                        except Exception as e:
+                            logger.warning(f"Failed to extract page {page_num} with PyPDF2: {e}")
+                            continue
+        except Exception as e:
+            logger.error(f"PyPDF2 selective extraction failed: {e}")
+            raise
+        
+        return full_text.strip(), page_texts
+    
+    def _pdfium_selective(self, pdf_path: str, page_selection: PageSelection) -> Tuple[str, Dict[int, str]]:
+        """Extract specific pages using pypdfium2."""
+        full_text = ""
+        page_texts = {}
+        
+        pdf = pdfium.PdfDocument(pdf_path)
+        for page_num in page_selection.selected_pages:
+            if page_num <= len(pdf):
+                try:
+                    page = pdf[page_num - 1]  # pypdfium2 uses 0-based indexing
+                    textpage = page.get_textpage()
+                    page_text = textpage.get_text_range()
+                    
+                    if page_text:
+                        page_texts[page_num] = page_text  # Use original page number
+                        full_text += f"\n--- PAGE {page_num} ---\n{page_text}\n\n"
+                    
+                    textpage.close()
+                    page.close()
+                except Exception as e:
+                    logger.warning(f"Failed to extract page {page_num} with pdfium: {e}")
+                    continue
+        
+        pdf.close()
+        return full_text.strip(), page_texts
+    
+    def _extract_with_ocr_selective(self, pdf_path: str, page_selection: PageSelection) -> Tuple[str, Dict[int, str]]:
+        """Extract specific pages using OCR."""
+        full_text = ""
+        page_texts = {}
+        
+        logger.info(f"Converting {page_selection.selected_count} selected pages to images for OCR: {pdf_path}")
+        
+        # Convert only selected pages to images to avoid processing all pages
+        try:
+            # Convert selected pages only using first_page and last_page parameters
+            images = {}
+            for page_num in page_selection.selected_pages:
+                logger.info(f"Converting page {page_num} to image for OCR")
+                try:
+                    # Convert single page to image
+                    page_images = convert_from_path(
+                        pdf_path, 
+                        dpi=300, 
+                        fmt='PNG',
+                        first_page=page_num,
+                        last_page=page_num
+                    )
+                    if page_images:
+                        images[page_num] = page_images[0]
+                except Exception as e:
+                    logger.warning(f"Failed to convert page {page_num} to image: {e}")
+                    continue
+        except Exception as e:
+            logger.warning(f"pdf2image failed: {e}")
+            # Try pypdfium2 fallback for selected pages only
+            if HAS_PDFIUM:
+                images = self._convert_selected_pages_with_pdfium(pdf_path, page_selection)
+            else:
+                logger.error("No PDF to image conversion available")
+                return "", {}
+        
+        # Process converted images
+        for page_num in page_selection.selected_pages:
+            if page_num in images:
+                logger.info(f"Processing page {page_num} with OCR")
+                
+                try:
+                    image = images[page_num]
+                    
+                    # Use enhanced OCR if available
+                    if self.use_enhanced_ocr:
+                        page_text, confidence = self.enhanced_ocr.process_image(image)
+                        if confidence < 0.6:
+                            logger.warning(f"Low OCR confidence on page {page_num}: {confidence:.2f}")
+                    else:
+                        # Basic OCR processing
+                        page_text = pytesseract.image_to_string(
+                            image, 
+                            lang='fra+eng',
+                            config='--oem 3 --psm 6'
+                        )
+                    
+                    if page_text.strip():
+                        page_texts[page_num] = page_text  # Use original page number
+                        full_text += f"\n--- PAGE {page_num} ---\n{page_text}\n\n"
+                    else:
+                        logger.warning(f"No text extracted from page {page_num}")
+                        
+                except Exception as e:
+                    logger.error(f"OCR failed for page {page_num}: {e}")
+        
+        logger.info(f"OCR extraction completed. Extracted {len(page_texts)} selected pages.")
+        return full_text.strip(), page_texts
+    
+    def _convert_pages_with_pdfium(self, pdf_path: str, total_pages: int) -> List:
+        """Convert PDF pages to images using pypdfium2."""
+        import pypdfium2 as pdfium
+        pdf = pdfium.PdfDocument(pdf_path)
+        images = []
+        
+        for i in range(min(total_pages, len(pdf))):
+            page = pdf[i]
+            pil_image = page.render(scale=300/72).to_pil()  # 300 DPI
+            images.append(pil_image)
+            page.close()
+        
+        pdf.close()
+        return images
+    
+    def _convert_selected_pages_with_pdfium(self, pdf_path: str, page_selection: PageSelection) -> Dict[int, any]:
+        """Convert only selected PDF pages to images using pypdfium2."""
+        import pypdfium2 as pdfium
+        pdf = pdfium.PdfDocument(pdf_path)
+        images = {}
+        
+        for page_num in page_selection.selected_pages:
+            if page_num <= len(pdf):
+                logger.info(f"Converting page {page_num} to image with pypdfium2")
+                page = pdf[page_num - 1]  # 0-based indexing
+                pil_image = page.render(scale=300/72).to_pil()  # 300 DPI
+                images[page_num] = pil_image
+                page.close()
+        
+        pdf.close()
+        return images
+    
+    def _filter_pages(self, all_pages: Dict[int, str], page_selection: PageSelection) -> Tuple[str, Dict[int, str]]:
+        """Filter extracted pages to include only selected ones."""
+        filtered_pages = {}
+        full_text = ""
+        
+        for page_num in page_selection.selected_pages:
+            if page_num in all_pages:
+                filtered_pages[page_num] = all_pages[page_num]
+                full_text += f"\n--- PAGE {page_num} ---\n{all_pages[page_num]}\n\n"
+        
+        return full_text.strip(), filtered_pages
+    
+    def create_page_subset_pdf(self, pdf_path: str, page_selection: PageSelection, 
+                             output_path: Optional[str] = None) -> str:
+        """
+        Create a new PDF containing only selected pages.
+        
+        Args:
+            pdf_path: Path to source PDF
+            page_selection: PageSelection object
+            output_path: Optional output path (auto-generated if None)
+            
+        Returns:
+            Path to the created subset PDF
+        """
+        if output_path is None:
+            base_name = os.path.splitext(os.path.basename(pdf_path))[0]
+            output_path = f"{base_name}_pages_{page_selection.ranges[0][0]}-{page_selection.ranges[-1][1]}.pdf"
+        
+        try:
+            with open(pdf_path, 'rb') as input_file:
+                pdf_reader = PyPDF2.PdfReader(input_file)
+                pdf_writer = PyPDF2.PdfWriter()
+                
+                # Add selected pages to writer
+                for page_num in page_selection.selected_pages:
+                    if page_num <= len(pdf_reader.pages):
+                        pdf_writer.add_page(pdf_reader.pages[page_num - 1])
+                
+                # Write to output file
+                with open(output_path, 'wb') as output_file:
+                    pdf_writer.write(output_file)
+            
+            logger.info(f"Created page subset PDF: {output_path}")
+            return output_path
+            
+        except Exception as e:
+            logger.error(f"Failed to create page subset PDF: {e}")
+            raise
+    
     def _should_enhance_with_ocr(self, text: str, page_texts: Dict[int, str]) -> bool:
         """Determine if OCR enhancement would be beneficial."""
         # Get text density (chars per page)
@@ -164,8 +488,27 @@ class PDFExtractor:
             expected_pages = set(range(1, max(page_numbers) + 1))
             missing_pages = expected_pages - set(page_numbers)
             if missing_pages:
-                logger.info(f"Missing pages detected: {missing_pages}, considering OCR enhancement")
-                return True
+                # Be more conservative for large documents
+                total_pages = max(page_numbers)
+                missing_count = len(missing_pages)
+                missing_percentage = (missing_count / total_pages) * 100
+                
+                # Only trigger OCR enhancement if:
+                # 1. Small document (< 50 pages) and any pages missing
+                # 2. Medium document (50-500 pages) and > 10% missing
+                # 3. Large document (> 500 pages) and > 20% missing
+                if total_pages < 50:
+                    logger.info(f"Missing pages detected in small document: {missing_pages}, considering OCR enhancement")
+                    return True
+                elif total_pages < 500 and missing_percentage > 10:
+                    logger.info(f"Missing {missing_count} pages ({missing_percentage:.1f}%) in medium document, considering OCR enhancement")
+                    return True
+                elif total_pages >= 500 and missing_percentage > 20:
+                    logger.info(f"Missing {missing_count} pages ({missing_percentage:.1f}%) in large document, considering OCR enhancement")
+                    return True
+                else:
+                    logger.info(f"Missing {missing_count} pages ({missing_percentage:.1f}%) in {total_pages}-page document, but extraction quality seems adequate - skipping OCR enhancement")
+                    return False
         
         # Check for signs of poor extraction (too many special characters)
         if text:
@@ -178,6 +521,47 @@ class PDFExtractor:
         quality_score = self._calculate_extraction_quality(text)
         if quality_score < 0.6:
             logger.info(f"Low extraction quality score ({quality_score:.2f}), considering OCR enhancement")
+            return True
+        
+        return False
+    
+    def _should_enhance_with_ocr_selective(self, text: str, page_texts: Dict[int, str], page_selection: PageSelection) -> bool:
+        """Determine if OCR enhancement would be beneficial for selected pages only."""
+        # For selective processing, we only check the quality of selected pages
+        if not text or not page_texts:
+            return True
+        
+        # Calculate text density for selected pages only
+        selected_page_count = len(page_texts)
+        if selected_page_count == 0:
+            return True
+            
+        text_density = len(text) / selected_page_count
+        
+        # If text density is very low for selected pages, likely scanned
+        if text_density < 100:
+            logger.info(f"Low text density ({text_density:.1f} chars/page) in selected pages, document likely scanned")
+            return True
+        
+        # Very short text from selected pages might indicate poor extraction
+        if len(text) < 500:
+            logger.info(f"Very short text ({len(text)} chars) from selected pages, considering OCR enhancement")
+            return True
+        
+        # Check for missing pages within our selection (not outside it)
+        if page_texts:
+            selected_page_numbers = set(page_selection.selected_pages)
+            extracted_page_numbers = set(page_texts.keys())
+            missing_in_selection = selected_page_numbers - extracted_page_numbers
+            
+            if missing_in_selection:
+                logger.info(f"Missing pages within selection: {missing_in_selection}, considering OCR enhancement")
+                return True
+        
+        # Check for signs of poor extraction quality
+        quality_score = self._calculate_extraction_quality(text)
+        if quality_score < 0.6:
+            logger.info(f"Low extraction quality score ({quality_score:.2f}) for selected pages, considering OCR enhancement")
             return True
         
         return False
@@ -438,6 +822,19 @@ class PDFExtractor:
     
     def _extract_with_ocr(self, pdf_path: str) -> Tuple[str, Dict[int, str]]:
         """Extract text using OCR for scanned PDFs with advanced processing."""
+        # Safety check: Get page count before processing
+        try:
+            with open(pdf_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                total_pages = len(pdf_reader.pages)
+                
+                # Warn for very large documents
+                if total_pages > 1000:
+                    logger.warning(f"Large document detected ({total_pages} pages). OCR processing may take a very long time.")
+                    logger.warning("Consider using selective page processing for large documents.")
+        except Exception:
+            total_pages = 0
+        
         # Try to use the advanced OCR engine if available
         try:
             from ocr_engine import AdvancedOCREngine
@@ -484,34 +881,49 @@ class PDFExtractor:
         for i, image in enumerate(images):
             logger.info(f"Processing page {i+1}/{len(images)} with OCR")
             
-            # Enhance image for better OCR (basic preprocessing)
-            from PIL import ImageEnhance, ImageFilter
-            
-            # Convert to grayscale
-            image = image.convert('L')
-            
-            # Enhance contrast
-            enhancer = ImageEnhance.Contrast(image)
-            image = enhancer.enhance(1.5)
-            
-            # Reduce noise
-            image = image.filter(ImageFilter.MedianFilter(size=3))
-            
-            # Perform OCR with both French and English for better accuracy
             try:
-                page_text = pytesseract.image_to_string(
-                    image, 
-                    lang='fra+eng',  # French + English
-                    config=custom_config
-                )
+                # Use enhanced OCR if available
+                if self.use_enhanced_ocr:
+                    page_text, confidence = self.enhanced_ocr.process_image(image)
+                    
+                    # Log OCR quality
+                    if confidence < 0.6:
+                        logger.warning(f"Low OCR confidence on page {i+1}: {confidence:.2f}")
+                    else:
+                        logger.debug(f"OCR confidence on page {i+1}: {confidence:.2f}")
+                
+                else:
+                    # Fallback to basic OCR processing
+                    from PIL import ImageEnhance, ImageFilter
+                    
+                    # Convert to grayscale
+                    image = image.convert('L')
+                    
+                    # Enhance contrast
+                    enhancer = ImageEnhance.Contrast(image)
+                    image = enhancer.enhance(1.5)
+                    
+                    # Reduce noise
+                    image = image.filter(ImageFilter.MedianFilter(size=3))
+                    
+                    # Perform OCR with both French and English
+                    page_text = pytesseract.image_to_string(
+                        image, 
+                        lang='fra+eng',  # French + English
+                        config=custom_config
+                    )
+                    confidence = 0.7  # Default confidence for basic OCR
                 
                 if page_text.strip():
-                    # Post-process the text
-                    page_text = self._post_process_ocr_text(page_text)
+                    # Post-process the text (enhanced version includes better corrections)
+                    if not self.use_enhanced_ocr:
+                        page_text = self._post_process_ocr_text(page_text)
+                    
                     page_texts[i + 1] = page_text
                     full_text += f"\n--- PAGE {i+1} ---\n{page_text}\n\n"
                 else:
                     logger.warning(f"No text extracted from page {i+1}")
+                    
             except Exception as e:
                 logger.error(f"OCR failed for page {i+1}: {e}")
         

@@ -12,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import traceback
+import PyQt5
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
@@ -51,12 +52,15 @@ class ProcessingThread(QThread):
     log_message = pyqtSignal(str)  # (log_message)
     
     def __init__(self, config: ProcessorConfig, document_paths: List[str], 
-                 output_path: str, user_info: Dict[str, str]):
+                 output_path: str, user_info: Dict[str, str], export_format: str = 'technical',
+                 page_ranges: Optional[str] = None):
         super().__init__()
         self.config = config
         self.document_paths = document_paths
         self.output_path = output_path
         self.user_info = user_info
+        self.export_format = export_format
+        self.page_ranges = page_ranges
         self.is_cancelled = False
     
     def run(self):
@@ -86,7 +90,13 @@ class ProcessingThread(QThread):
                 
                 try:
                     if os.path.isfile(doc_path):
-                        result = processor.process_document(doc_path)
+                        # Use selective processing if page ranges are specified
+                        if self.page_ranges:
+                            self.log_message.emit(f"Processing {filename} with page selection: {self.page_ranges}")
+                            result = processor.process_document_selective(doc_path, self.page_ranges)
+                        else:
+                            result = processor.process_document(doc_path)
+                            
                         if result:
                             processed_count += 1
                             summary = self._create_summary(result, filename)
@@ -114,20 +124,31 @@ class ProcessingThread(QThread):
                     self.log_message.emit(f"✗ Error processing {filename}: {str(e)}")
                     continue
             
-            # Export results
-            self.progress_update.emit(90, "Generating Excel export...")
-            self.log_message.emit("Exporting results to Excel...")
+            # Export results based on format
+            self.progress_update.emit(90, f"Generating {self.export_format} export...")
+            self.log_message.emit(f"Exporting results in {self.export_format} format...")
             self.log_message.emit(f"Processor has {len(processor.processed_documents)} documents ready for export")
             self.log_message.emit(f"Export path: {self.output_path}")
             
-            processor.export_results(
-                self.output_path,
-                format='excel',
-                include_validation=self.config.enable_ai_validation,
-                include_articles=self.config.extract_articles,
-                include_full_text=True,
-                user_info=self.user_info
-            )
+            # Debug logging
+            self.log_message.emit(f"Export format selected: '{self.export_format}'")
+            
+            if self.export_format == 'client':
+                self.log_message.emit("Calling client report export...")
+                processor.export_client_report(self.output_path, user_info=self.user_info)
+            elif self.export_format == 'cartographie':
+                self.log_message.emit("Calling cartographie réglementaire export...")
+                processor.export_cartographie_reglementaire(self.output_path, user_info=self.user_info)
+            else:  # technical (default)
+                self.log_message.emit(f"Calling technical export (default for format: '{self.export_format}')...")
+                processor.export_results(
+                    self.output_path,
+                    format='excel',
+                    include_validation=self.config.enable_ai_validation,
+                    include_articles=self.config.extract_articles,
+                    include_full_text=True,
+                    user_info=self.user_info
+                )
             
             # Create final summary
             final_summary = processor.get_summary()
@@ -317,10 +338,37 @@ class JABERegulatoryGUI(QMainWindow):
     
     def _create_input_tab(self) -> QWidget:
         """Create the document input tab with JABE styling."""
+        # Create scroll area
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setStyleSheet(f"""
+            QScrollArea {{
+                background-color: {JABEColors.LIGHT_GRAY};
+                border: none;
+            }}
+            QScrollBar:vertical {{
+                background-color: {JABEColors.MEDIUM_GRAY};
+                width: 12px;
+                border-radius: 6px;
+            }}
+            QScrollBar::handle:vertical {{
+                background-color: {JABEColors.PRIMARY_BLUE};
+                border-radius: 6px;
+                min-height: 20px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background-color: {JABEColors.LIGHT_BLUE};
+            }}
+        """)
+        
+        # Create content widget
         widget = QWidget()
         widget.setStyleSheet(f"background-color: {JABEColors.LIGHT_GRAY};")
         layout = QVBoxLayout(widget)
         layout.setSpacing(20)
+        layout.setContentsMargins(20, 20, 20, 20)
         
         # User Information Group
         user_group = self._create_styled_group("👤 Informations Utilisateur")
@@ -372,6 +420,58 @@ class JABERegulatoryGUI(QMainWindow):
         paths_layout.addLayout(buttons_layout)
         paths_group.setLayout(paths_layout)
         layout.addWidget(paths_group)
+        
+        # Page Selection Group
+        page_group = self._create_styled_group("📄 Sélection de Pages (Optionnel)")
+        page_layout = QVBoxLayout()
+        page_layout.setSpacing(15)
+        
+        # Enable page selection checkbox
+        self.enable_page_selection = self._create_checkbox("Traiter uniquement des pages spécifiques")
+        self.enable_page_selection.toggled.connect(self.toggle_page_selection)
+        page_layout.addWidget(self.enable_page_selection)
+        
+        # Page range input
+        page_input_layout = QGridLayout()
+        page_input_layout.setSpacing(10)
+        
+        page_input_layout.addWidget(self._create_label("Pages à traiter:"), 0, 0)
+        self.page_ranges_input = self._create_input("ex: 1-10, 15, 20-25, 30-40")
+        self.page_ranges_input.setEnabled(False)
+        self.page_ranges_input.textChanged.connect(self.validate_page_ranges)
+        page_input_layout.addWidget(self.page_ranges_input, 0, 1)
+        
+        # Validation status
+        self.page_validation_label = QLabel()
+        self.page_validation_label.setStyleSheet(f"""
+            color: {JABEColors.DARK_GRAY};
+            font-size: 11px;
+            font-style: italic;
+            background: transparent;
+            padding: 2px;
+        """)
+        page_input_layout.addWidget(self.page_validation_label, 1, 1)
+        
+        page_layout.addLayout(page_input_layout)
+        
+        # Examples and help
+        page_help = QLabel("""
+• Format: "1-10, 15, 20-25" (plages et pages individuelles)
+• Les pages sont numérotées à partir de 1
+• Les plages invalides seront ignorées
+• Laisser vide pour traiter tout le document
+        """)
+        page_help.setStyleSheet(f"""
+            color: {JABEColors.DARK_GRAY};
+            font-size: 10px;
+            background: transparent;
+            padding: 5px;
+        """)
+        page_help.setWordWrap(True)
+        page_layout.addWidget(page_help)
+        
+        page_group.setLayout(page_layout)
+        layout.addWidget(page_group)
         
         # Output Settings Group
         output_group = self._create_styled_group("💾 Paramètres de Sortie")
@@ -430,14 +530,43 @@ class JABERegulatoryGUI(QMainWindow):
         layout.addLayout(action_layout)
         layout.addStretch()
         
-        return widget
+        # Set the content widget to the scroll area
+        scroll_area.setWidget(widget)
+        return scroll_area
     
     def _create_config_tab(self) -> QWidget:
         """Create the configuration tab with JABE styling."""
+        # Create scroll area
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setStyleSheet(f"""
+            QScrollArea {{
+                background-color: {JABEColors.LIGHT_GRAY};
+                border: none;
+            }}
+            QScrollBar:vertical {{
+                background-color: {JABEColors.MEDIUM_GRAY};
+                width: 12px;
+                border-radius: 6px;
+            }}
+            QScrollBar::handle:vertical {{
+                background-color: {JABEColors.PRIMARY_BLUE};
+                border-radius: 6px;
+                min-height: 20px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background-color: {JABEColors.LIGHT_BLUE};
+            }}
+        """)
+        
+        # Create content widget
         widget = QWidget()
         widget.setStyleSheet(f"background-color: {JABEColors.LIGHT_GRAY};")
         layout = QVBoxLayout(widget)
         layout.setSpacing(20)
+        layout.setContentsMargins(20, 20, 20, 20)
         
         # Processing Settings
         processing_group = self._create_styled_group("⚙️ Configuration du Traitement")
@@ -465,7 +594,7 @@ class JABERegulatoryGUI(QMainWindow):
         ai_layout.setSpacing(15)
         
         self.enable_ai_checkbox = self._create_checkbox("Activer la Validation IA")
-        self.enable_ai_checkbox.setChecked(True)
+        self.enable_ai_checkbox.setChecked(False)
         self.enable_ai_checkbox.toggled.connect(self.toggle_ai_settings)
         ai_layout.addWidget(self.enable_ai_checkbox, 0, 0, 1, 2)
         
@@ -478,12 +607,62 @@ class JABERegulatoryGUI(QMainWindow):
         self.ai_model_combo = self._create_combobox([
             "claude-3-haiku-20240307",
             "claude-3-sonnet-20240229", 
-            "claude-3-opus-20240229"
+            "claude-3-opus-20240229",
+            "claude-3-5-sonnet-20241022",
+            "claude-3-5-haiku-20241022",
+            "claude-opus-4-20250514"
         ])
+        self.ai_model_combo.setCurrentText("claude-opus-4-20250514")  # Set default to best model
         ai_layout.addWidget(self.ai_model_combo, 2, 1)
+        
+        # Model description
+        model_desc = QLabel("""
+• Claude Opus 4: Modèle le plus récent et performant (recommandé)
+• Claude 3.5 Sonnet: Excellent équilibre performance/coût
+• Claude 3 Opus: Ancien modèle haute performance
+        """)
+        model_desc.setStyleSheet(f"""
+            color: {JABEColors.DARK_GRAY};
+            font-size: 10px;
+            background: transparent;
+            padding: 5px;
+        """)
+        model_desc.setWordWrap(True)
+        ai_layout.addWidget(model_desc, 3, 0, 1, 2)
         
         ai_group.setLayout(ai_layout)
         layout.addWidget(ai_group)
+        
+        # Export Format Settings
+        export_group = self._create_styled_group("📊 Format d'Export")
+        export_layout = QVBoxLayout()
+        export_layout.setSpacing(10)
+        
+        self.export_format_combo = self._create_combobox([
+            "Technique (Détaillé)",
+            "Client (Synthétique)", 
+            "Cartographie Réglementaire"
+        ])
+        self.export_format_combo.setCurrentText("Technique (Détaillé)")
+        export_layout.addWidget(self.export_format_combo)
+        
+        # Export format descriptions
+        export_desc = QLabel("""
+        • Technique: Analyse complète avec validation IA et détails techniques
+        • Client: Rapport synthétique orienté conformité et priorités
+        • Cartographie: Mapping réglementaire structuré par catégories
+        """)
+        export_desc.setStyleSheet(f"""
+            color: {JABEColors.DARK_GRAY};
+            font-size: 11px;
+            background: transparent;
+            padding: 5px;
+        """)
+        export_desc.setWordWrap(True)
+        export_layout.addWidget(export_desc)
+        
+        export_group.setLayout(export_layout)
+        layout.addWidget(export_group)
         
         # Feature Settings
         features_group = self._create_styled_group("🎯 Paramètres des Fonctionnalités")
@@ -501,6 +680,19 @@ class JABERegulatoryGUI(QMainWindow):
         self.clean_text_checkbox = self._create_checkbox("Nettoyer le Texte Extrait")
         self.clean_text_checkbox.setChecked(True)
         features_layout.addWidget(self.clean_text_checkbox)
+        
+        # Quality Enhancement Settings
+        self.use_enhanced_ocr_checkbox = self._create_checkbox("Utiliser l'OCR Amélioré (pour documents scannés)")
+        self.use_enhanced_ocr_checkbox.setChecked(True)
+        features_layout.addWidget(self.use_enhanced_ocr_checkbox)
+        
+        self.use_enhanced_prompts_checkbox = self._create_checkbox("Utiliser les Prompts IA Améliorés")
+        self.use_enhanced_prompts_checkbox.setChecked(True)
+        features_layout.addWidget(self.use_enhanced_prompts_checkbox)
+        
+        self.enable_quality_validation_checkbox = self._create_checkbox("Activer la Validation Qualité")
+        self.enable_quality_validation_checkbox.setChecked(True)
+        features_layout.addWidget(self.enable_quality_validation_checkbox)
         
         features_group.setLayout(features_layout)
         layout.addWidget(features_group)
@@ -523,7 +715,9 @@ class JABERegulatoryGUI(QMainWindow):
         layout.addLayout(preset_layout)
         layout.addStretch()
         
-        return widget
+        # Set the content widget to the scroll area
+        scroll_area.setWidget(widget)
+        return scroll_area
     
     def _create_processing_tab(self) -> QWidget:
         """Create the processing tab with JABE styling."""
@@ -1044,6 +1238,55 @@ class JABERegulatoryGUI(QMainWindow):
         self.ai_model_combo.setEnabled(enabled)
         self.assess_materiality_checkbox.setEnabled(enabled)
     
+    def toggle_page_selection(self, enabled: bool):
+        """Toggle page selection input."""
+        self.page_ranges_input.setEnabled(enabled)
+        if not enabled:
+            self.page_ranges_input.clear()
+            self.page_validation_label.clear()
+    
+    def validate_page_ranges(self):
+        """Validate page range input as user types."""
+        if not self.enable_page_selection.isChecked():
+            return
+        
+        range_text = self.page_ranges_input.text().strip()
+        if not range_text:
+            self.page_validation_label.setText("")
+            return
+        
+        try:
+            from regulatory_processor.page_selector import PageRangeParser
+            parser = PageRangeParser()
+            ranges = parser.parse_range_string(range_text)
+            
+            # Count total pages selected
+            total_pages = sum(end - start + 1 for start, end in ranges)
+            merged_ranges = parser.merge_overlapping_ranges(ranges)
+            
+            # Display validation result
+            if len(merged_ranges) != len(ranges):
+                self.page_validation_label.setText(f"✅ {total_pages} pages (plages fusionnées)")
+            else:
+                self.page_validation_label.setText(f"✅ {total_pages} pages sélectionnées")
+                
+            self.page_validation_label.setStyleSheet(f"""
+                color: {JABEColors.SUCCESS_GREEN};
+                font-size: 11px;
+                font-style: italic;
+                background: transparent;
+                padding: 2px;
+            """)
+        except ValueError as e:
+            self.page_validation_label.setText(f"❌ {str(e)}")
+            self.page_validation_label.setStyleSheet(f"""
+                color: {JABEColors.ERROR_RED};
+                font-size: 11px;
+                font-style: italic;
+                background: transparent;
+                padding: 2px;
+            """)
+    
     def load_basic_preset(self):
         """Load basic processing preset."""
         self.chunk_size_input.setValue(800)
@@ -1101,6 +1344,21 @@ class JABERegulatoryGUI(QMainWindow):
             if not api_key:
                 errors.append("La clé API est requise pour la validation IA")
         
+        # Check page selection settings
+        if self.enable_page_selection.isChecked():
+            page_ranges_text = self.page_ranges_input.text().strip()
+            if not page_ranges_text:
+                errors.append("Les plages de pages sont requises quand la sélection de pages est activée")
+            else:
+                try:
+                    from regulatory_processor.page_selector import PageRangeParser
+                    parser = PageRangeParser()
+                    parser.parse_range_string(page_ranges_text)
+                except ValueError as e:
+                    errors.append(f"Format de plages de pages invalide: {str(e)}")
+                except ImportError:
+                    errors.append("Le module de sélection de pages n'est pas disponible")
+        
         if errors:
             QMessageBox.warning(self, "Erreurs de Validation", "\n".join(f"• {error}" for error in errors))
             return False
@@ -1114,7 +1372,7 @@ class JABERegulatoryGUI(QMainWindow):
         if not self.validate_inputs():
             return
         
-        # Create configuration
+        # Create configuration with enhanced settings
         config = ProcessorConfig(
             chunk_size=self.chunk_size_input.value(),
             chunk_overlap=self.chunk_overlap_input.value(),
@@ -1125,18 +1383,42 @@ class JABERegulatoryGUI(QMainWindow):
             clean_text=self.clean_text_checkbox.isChecked(),
             anthropic_api_key=self.api_key_input.text().strip() or None,
             ai_model=self.ai_model_combo.currentText(),
+            # Enhanced quality settings
+            use_enhanced_ocr=self.use_enhanced_ocr_checkbox.isChecked(),
+            use_enhanced_prompts=self.use_enhanced_prompts_checkbox.isChecked(),
+            enable_quality_validation=self.enable_quality_validation_checkbox.isChecked(),
+            # Improved AI settings for better quality
+            ai_temperature=0.1,  # Lower temperature for more consistent results
+            ai_max_tokens=4000,  # Standard token limit for analysis
             log_level="INFO"
         )
         
         # Get document paths
         paths = [p.strip() for p in self.paths_list.toPlainText().split('\n') if p.strip()]
         
-        # Create output path with user info
+        # Get export format first to determine filename
+        export_format_text = self.export_format_combo.currentText()
+        export_format = 'technical'  # default
+        if 'Client' in export_format_text:
+            export_format = 'client'
+        elif 'Cartographie' in export_format_text:
+            export_format = 'cartographie'
+        
+        # Debug logging for export format detection
+        print(f"DEBUG: Combo box text: '{export_format_text}'")
+        print(f"DEBUG: Detected export format: '{export_format}'")
+        
+        # Create output path with user info and format
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         user_name = f"{self.name_input.text().strip()}_{self.surname_input.text().strip()}"
         user_name = user_name.replace(' ', '_').replace('-', '_')  # Clean filename
         
         base_filename = self.output_filename_input.text().strip() or "analyse_reglementaire"
+        if export_format == 'cartographie':
+            base_filename = "cartographie_reglementaire"
+        elif export_format == 'client':
+            base_filename = "rapport_client"
+        
         filename = f"{base_filename}_{user_name}_{timestamp}.xlsx"
         output_path = os.path.join(self.output_dir_input.text(), filename)
         
@@ -1146,8 +1428,13 @@ class JABERegulatoryGUI(QMainWindow):
             'surname': self.surname_input.text().strip()
         }
         
+        # Get page ranges if enabled
+        page_ranges = None
+        if self.enable_page_selection.isChecked() and self.page_ranges_input.text().strip():
+            page_ranges = self.page_ranges_input.text().strip()
+        
         # Start processing thread
-        self.processing_thread = ProcessingThread(config, paths, output_path, user_info)
+        self.processing_thread = ProcessingThread(config, paths, output_path, user_info, export_format, page_ranges)
         self.processing_thread.progress_update.connect(self.update_progress)
         self.processing_thread.document_processed.connect(self.document_processed)
         self.processing_thread.processing_complete.connect(self.processing_complete)
@@ -1295,6 +1582,13 @@ class JABERegulatoryGUI(QMainWindow):
         self.settings.setValue('chunk_overlap', self.chunk_overlap_input.value())
         self.settings.setValue('enable_ai', self.enable_ai_checkbox.isChecked())
         self.settings.setValue('ai_model', self.ai_model_combo.currentText())
+        self.settings.setValue('export_format', self.export_format_combo.currentText())
+        self.settings.setValue('enable_page_selection', self.enable_page_selection.isChecked())
+        self.settings.setValue('page_ranges', self.page_ranges_input.text())
+        # Save quality enhancement settings
+        self.settings.setValue('use_enhanced_ocr', self.use_enhanced_ocr_checkbox.isChecked())
+        self.settings.setValue('use_enhanced_prompts', self.use_enhanced_prompts_checkbox.isChecked())
+        self.settings.setValue('enable_quality_validation', self.enable_quality_validation_checkbox.isChecked())
     
     def load_settings(self):
         """Load application settings."""
@@ -1305,10 +1599,31 @@ class JABERegulatoryGUI(QMainWindow):
         self.chunk_overlap_input.setValue(int(self.settings.value('chunk_overlap', 200)))
         self.enable_ai_checkbox.setChecked(self.settings.value('enable_ai', True, type=bool))
         
-        ai_model = self.settings.value('ai_model', 'claude-3-haiku-20240307')
+        ai_model = self.settings.value('ai_model', 'claude-opus-4-20250514')
         index = self.ai_model_combo.findText(ai_model)
         if index >= 0:
             self.ai_model_combo.setCurrentIndex(index)
+        else:
+            # Set to Claude Opus 4 by default if not found
+            opus_index = self.ai_model_combo.findText('claude-opus-4-20250514')
+            if opus_index >= 0:
+                self.ai_model_combo.setCurrentIndex(opus_index)
+        
+        export_format = self.settings.value('export_format', 'Technique (Détaillé)')
+        index = self.export_format_combo.findText(export_format)
+        if index >= 0:
+            self.export_format_combo.setCurrentIndex(index)
+        
+        # Load page selection settings
+        self.enable_page_selection.setChecked(self.settings.value('enable_page_selection', False, type=bool))
+        self.page_ranges_input.setText(self.settings.value('page_ranges', ''))
+        # Trigger the toggle to enable/disable the input field
+        self.toggle_page_selection(self.enable_page_selection.isChecked())
+        
+        # Load quality enhancement settings
+        self.use_enhanced_ocr_checkbox.setChecked(self.settings.value('use_enhanced_ocr', True, type=bool))
+        self.use_enhanced_prompts_checkbox.setChecked(self.settings.value('use_enhanced_prompts', True, type=bool))
+        self.enable_quality_validation_checkbox.setChecked(self.settings.value('enable_quality_validation', True, type=bool))
     
     def closeEvent(self, event):
         """Handle application close."""

@@ -86,9 +86,9 @@ class ExcelExporter:
             # Verify file was created
             if os.path.exists(output_path):
                 file_size = os.path.getsize(output_path)
-                logger.info(f"✅ Successfully exported {len(documents)} documents to {output_path} (Size: {file_size} bytes)")
+                logger.info(f"Successfully exported {len(documents)} documents to {output_path} (Size: {file_size} bytes)")
             else:
-                logger.error(f"❌ File was not created at {output_path}")
+                logger.error(f"File was not created at {output_path}")
                 raise FileNotFoundError(f"Export file was not created: {output_path}")
             
         except Exception as e:

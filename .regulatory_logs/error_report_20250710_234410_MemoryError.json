@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-07-10T23:44:10.762604",
+  "error_type": "MemoryError",
+  "error_message": "",
+  "function_name": "_extract_with_ocr_safe",
+  "file_path": "C:\\Users\\doupa\\Desktop\\text\\COBAC2021leger_4.pdf",
+  "severity": "CRITICAL",
+  "recovery_strategy": "FAIL",
+  "recovery_successful": false,
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\doupa\\Desktop\\Ventures\\Orabank\\regulatory_processor\\extractors.py\", line 872, in _extract_with_ocr_safe\n    return self._extract_with_ocr(pdf_path)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^\n  File \"C:\\Users\\doupa\\Desktop\\Ventures\\Orabank\\regulatory_processor\\extractors.py\", line 804, in _extract_with_ocr\n    pil_image = page.render(scale=300/72).to_pil()  # 300 DPI\n                ~~~~~~~~~~~^^^^^^^^^^^^^^\n  File \"C:\\Users\\doupa\\AppData\\Roaming\\Python\\Python313\\site-packages\\pypdfium2\\_helpers\\page.py\", line 422, in render\n    bitmap = bitmap_maker(width, height, format=cl_format, rev_byteorder=rev_byteorder)\n  File \"C:\\Users\\doupa\\AppData\\Roaming\\Python\\Python313\\site-packages\\pypdfium2\\_helpers\\bitmap.py\", line 121, in new_native\n    buffer = (ctypes.c_ubyte * (stride * height))()\nMemoryError\n",
+  "context": {}
+}

@@ -1,0 +1,70 @@
+{
+  "test_type": "Test réel de cartographie réglementaire",
+  "test_summary": {
+    "total_tests": 5,
+    "tests_passed": 5,
+    "tests_failed": 0,
+    "success_rate": 100.0
+  },
+  "duration": 0.135206,
+  "performance_metrics": {},
+  "file_analysis": {
+    "cartographie_reglementaire_Doupamby_Nyamat_20250714_104522.xlsx": {
+      "size_kb": 30.8623046875,
+      "modified": "2025-07-14T10:59:58.285246",
+      "analysis_date": "2025-07-14T11:41:42.983029"
+    },
+    "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva.xlsx": {
+      "size_kb": 23.2275390625,
+      "modified": "2025-07-11T20:22:46.577606",
+      "analysis_date": "2025-07-14T11:41:42.987101"
+    },
+    "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_173703.xlsx": {
+      "size_kb": 13.201171875,
+      "modified": "2025-07-11T17:37:13.819789",
+      "analysis_date": "2025-07-14T11:41:42.991325"
+    },
+    "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_174036.xlsx": {
+      "size_kb": 6.4423828125,
+      "modified": "2025-07-11T17:40:46.974657",
+      "analysis_date": "2025-07-14T11:41:42.996045"
+    },
+    "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250713_221844.xlsx": {
+      "size_kb": 23.3681640625,
+      "modified": "2025-07-13T22:28:44.987128",
+      "analysis_date": "2025-07-14T11:41:43.000471"
+    },
+    "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250714_095714.xlsx": {
+      "size_kb": 31.0830078125,
+      "modified": "2025-07-14T10:13:56.443020",
+      "analysis_date": "2025-07-14T11:41:43.004728"
+    },
+    "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_191639.xlsx": {
+      "size_kb": 11.4560546875,
+      "modified": "2025-07-11T19:25:22.597867",
+      "analysis_date": "2025-07-14T11:41:43.008778"
+    },
+    "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_194758.xlsx": {
+      "size_kb": 11.4140625,
+      "modified": "2025-07-11T19:56:40.309877",
+      "analysis_date": "2025-07-14T11:41:43.012626"
+    }
+  },
+  "errors": [],
+  "warnings": [
+    "Import CartographieExporter: No module named 'PyPDF2'"
+  ],
+  "recommendations": [
+    "Implémenter des tests unitaires pour chaque composant",
+    "Ajouter la validation des données en temps réel",
+    "Optimiser les performances de catégorisation",
+    "Implémenter un système de cache pour les résultats IA",
+    "Ajouter des métriques de qualité pour les extractions",
+    "Créer un système de fallback robuste en cas d'erreur IA",
+    "Implémenter la validation des fichiers Excel générés",
+    "Ajouter des logs détaillés pour le débogage",
+    "Créer des tests de régression automatisés"
+  ],
+  "processed_documents": 3,
+  "test_timestamp": "2025-07-14T11:41:43.106360"
+}

@@ -20,7 +20,20 @@
       "Bash(./OraEnv/Scripts/python.exe ocr_engine.py)",
       "Bash(./OraEnv/Scripts/python.exe -c \"from regulatory_processor.extractors import PDFExtractor; ext = PDFExtractor(); print(f'OCR Available: {ext.extraction_methods[-1].__name__ == \\\"_extract_with_ocr\\\" if ext.extraction_methods else False}')\")",
       "Bash(./OraEnv/Scripts/python.exe test_ocr_functionality.py)",
-      "Bash(./OraEnv/Scripts/python.exe -c \"\nfrom regulatory_processor.validators import AIValidator\nmethods = [method for method in dir(AIValidator) if '_extract' in method]\nprint('Available extract methods:')\nfor method in methods:\n    print(f'  - {method}')\n\")"
+      "Bash(./OraEnv/Scripts/python.exe -c \"\nfrom regulatory_processor.validators import AIValidator\nmethods = [method for method in dir(AIValidator) if '_extract' in method]\nprint('Available extract methods:')\nfor method in methods:\n    print(f'  - {method}')\n\")",
+      "Bash(rg:*)",
+      "Bash(source:*)",
+      "Bash(./OraEnv/Scripts/pip.exe install networkx)",
+      "Bash(./OraEnv/Scripts/pip.exe install camelot-py[cv])",
+      "Bash(./OraEnv/Scripts/python.exe -c \"import networkx; print('NetworkX version:', networkx.__version__)\")",
+      "Bash(./OraEnv/Scripts/python.exe -c \"import pandas, camelot, tabula; print('Table libs: pandas', pandas.__version__, 'camelot OK, tabula OK')\")",
+      "Bash(./OraEnv/Scripts/pip.exe install easyocr)",
+      "Bash(pip3 install:*)",
+      "Bash(sudo apt:*)",
+      "Bash(sudo apt install:*)",
+      "Bash(OraEnv/Scripts/python:*)",
+      "Bash(apt list:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

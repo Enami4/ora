@@ -14,6 +14,10 @@ from .chunkers import TextChunker, SemanticChunker
 from .exporters import ExcelExporter, CSVExporter
 from .validators import AIValidator, ValidationChain
 from .client_exporter import ClientExcelExporter
+from .cartographie_exporter import CartographieExporter
+from .quality_validator import QualityValidator
+from .metrics_collector import get_metrics_collector, record_processing_session
+from .page_selector import PageSelection, PageRangeParser
 from .caching import get_cache
 from .error_recovery import get_error_manager, with_retry, safe_execute
 from .utils import (
@@ -37,7 +41,9 @@ class RegulatoryDocumentProcessor:
         self.config = config or ProcessorConfig()
         self.logger = setup_logging(self.config)
         
-        self.extractor = PDFExtractor()
+        # Initialize PDF extractor with enhanced OCR if enabled
+        self.extractor = PDFExtractor(use_enhanced_ocr=self.config.use_enhanced_ocr)
+        
         self.chunker = SemanticChunker(
             chunk_size=self.config.chunk_size,
             chunk_overlap=self.config.chunk_overlap
@@ -49,6 +55,12 @@ class RegulatoryDocumentProcessor:
         self.client_excel_exporter = ClientExcelExporter(
             max_cell_length=self.config.excel_max_cell_length
         )
+        self.cartographie_exporter = CartographieExporter(config=self.config)
+        
+        # Initialize quality validator if enabled
+        self.quality_validator = None
+        if self.config.enable_quality_validation:
+            self.quality_validator = QualityValidator()
         
         # Initialize AI validation if enabled
         self.validator = None
@@ -56,9 +68,15 @@ class RegulatoryDocumentProcessor:
         if self.config.enable_ai_validation or self.config.extract_articles:
             self.validator = AIValidator(
                 api_key=self.config.anthropic_api_key,
-                model=self.config.ai_model
+                model=self.config.enhanced_ai_model or self.config.ai_model,
+                use_enhanced_prompts=self.config.use_enhanced_prompts
             )
             self.validation_chain = ValidationChain(self.validator)
+        
+        # Initialize metrics collector if enabled
+        self.metrics_collector = None
+        if self.config.enable_metrics_collection:
+            self.metrics_collector = get_metrics_collector()
         
         self.processed_documents = []
         self.processing_errors = []
@@ -74,7 +92,12 @@ class RegulatoryDocumentProcessor:
         Returns:
             Dictionary containing all processed data, or None if processing failed
         """
-        logger.info(f"Starting processing: {pdf_path}")
+        # Generate session ID and start timing
+        import uuid
+        session_id = str(uuid.uuid4())
+        start_time = datetime.now()
+        
+        logger.info(f"Starting processing: {pdf_path} (Session: {session_id})")
         error_manager = get_error_manager()
         
         # File validation with error recovery
@@ -93,6 +116,20 @@ class RegulatoryDocumentProcessor:
                 'error': error_msg,
                 'timestamp': datetime.now().isoformat()
             })
+            
+            # Record failed processing metrics
+            processing_time = (datetime.now() - start_time).total_seconds()
+            try:
+                metrics_collector = get_metrics_collector()
+                metrics_collector.record_error(
+                    session_id=session_id,
+                    error_type="validation_error",
+                    error_message=error_msg,
+                    function_name="process_document"
+                )
+            except Exception as e:
+                logger.warning(f"Failed to record error metrics: {e}")
+            
             return None
         
         try:
@@ -163,11 +200,20 @@ class RegulatoryDocumentProcessor:
                 logger.info(f"Running AI validation and article extraction for {pdf_path}")
                 
                 # Safely run validation chain
-                validated_data = safe_execute(
-                    self.validation_chain.validate_document,
-                    document_data,
-                    default_return=document_data
-                )
+                try:
+                    validated_data = self.validation_chain.validate_document(document_data)
+                except Exception as e:
+                    logger.error(f"Validation chain failed: {e}")
+                    # Use the original document data
+                    validated_data = document_data
+                    
+                    # Try basic article extraction as fallback
+                    if 'cleaned_text' in document_data:
+                        logger.info("Attempting fallback article extraction")
+                        articles = self._extract_articles_basic(document_data['cleaned_text'])
+                        if articles:
+                            validated_data['articles'] = articles
+                            logger.info(f"Fallback extraction found {len(articles)} articles")
                 
                 if validated_data:
                     document_data = validated_data
@@ -180,8 +226,69 @@ class RegulatoryDocumentProcessor:
                 if 'articles' in document_data:
                     logger.info(f"Extracted {len(document_data['articles'])} articles")
             
+            # Apply quality validation to the complete processing result if enabled
+            quality_validation = None
+            if self.quality_validator:
+                logger.info(f"Running quality validation for {pdf_path}")
+                quality_validation = safe_execute(
+                    self.quality_validator.validate_document_processing,
+                    document_data,
+                    default_return=None
+                )
+            
+            if quality_validation:
+                document_data['quality_validation'] = {
+                    'is_valid': quality_validation.is_valid,
+                    'quality_metrics': {
+                        'ocr_confidence': quality_validation.quality_metrics.ocr_confidence,
+                        'text_completeness': quality_validation.quality_metrics.text_completeness,
+                        'structure_coherence': quality_validation.quality_metrics.structure_coherence,
+                        'article_extraction_rate': quality_validation.quality_metrics.article_extraction_rate,
+                        'regulatory_term_accuracy': quality_validation.quality_metrics.regulatory_term_accuracy,
+                        'overall_score': quality_validation.quality_metrics.overall_score,
+                        'status': quality_validation.quality_metrics.status.value,
+                        'timestamp': quality_validation.quality_metrics.timestamp.isoformat()
+                    },
+                    'validation_details': quality_validation.validation_details,
+                    'recommendations': quality_validation.recommendations
+                }
+                
+                # Log quality validation results
+                overall_quality = quality_validation.quality_metrics.overall_score
+                status = quality_validation.quality_metrics.status.value
+                logger.info(f"Quality validation - Score: {overall_quality:.2f}, Status: {status}")
+                
+                if not quality_validation.is_valid:
+                    logger.warning(f"Quality validation failed for {pdf_path}")
+                    for recommendation in quality_validation.recommendations[:3]:  # Log first 3 recommendations
+                        logger.warning(f"Recommendation: {recommendation}")
+                else:
+                    logger.info(f"Quality validation passed for {pdf_path}")
+            
+            # Record processing metrics
+            processing_time = (datetime.now() - start_time).total_seconds()
+            try:
+                record_processing_session(
+                    session_id=session_id,
+                    file_name=os.path.basename(pdf_path),
+                    processing_result=document_data,
+                    processing_time=processing_time
+                )
+                logger.debug(f"Recorded processing metrics for session {session_id}")
+            except Exception as e:
+                logger.warning(f"Failed to record processing metrics: {e}")
+            
+            # Add session metadata to document data
+            document_data['session_info'] = {
+                'session_id': session_id,
+                'processing_time': processing_time,
+                'start_time': start_time.isoformat(),
+                'end_time': datetime.now().isoformat()
+            }
+            
             self.processed_documents.append(document_data)
             logger.info(f"Successfully processed {pdf_path}: {statistics['total_chunks']} chunks created")
+            logger.info(f"Processing time: {processing_time:.2f} seconds")
             logger.info(f"Total processed documents now: {len(self.processed_documents)}")
             
             return document_data
@@ -193,6 +300,270 @@ class RegulatoryDocumentProcessor:
                 'error': str(e),
                 'timestamp': datetime.now().isoformat()
             })
+            
+            # Record failed processing metrics
+            processing_time = (datetime.now() - start_time).total_seconds()
+            try:
+                metrics_collector = get_metrics_collector()
+                metrics_collector.record_error(
+                    session_id=session_id,
+                    error_type="processing_error",
+                    error_message=str(e),
+                    function_name="process_document",
+                    stack_trace=str(e.__traceback__) if hasattr(e, '__traceback__') else ""
+                )
+            except Exception as me:
+                logger.warning(f"Failed to record error metrics: {me}")
+            
+            return None
+    
+    @with_retry(max_retries=1, base_delay=2.0, retry_exceptions=(OSError, PermissionError))
+    def process_document_selective(self, pdf_path: str, page_ranges: str) -> Optional[Dict[str, Any]]:
+        """
+        Process specific pages of a PDF document.
+        
+        Args:
+            pdf_path: Path to the PDF file
+            page_ranges: Page range specification (e.g., "1-10, 15, 20-30")
+            
+        Returns:
+            Dictionary containing all processed data, or None if processing failed
+        """
+        # Generate session ID and start timing
+        import uuid
+        session_id = str(uuid.uuid4())
+        start_time = datetime.now()
+        
+        logger.info(f"Starting selective processing: {pdf_path} (Pages: {page_ranges}, Session: {session_id})")
+        error_manager = get_error_manager()
+        
+        # Validate PDF file
+        validation_result = safe_execute(
+            validate_pdf_file,
+            pdf_path, 
+            max_size_mb=self.config.max_file_size_mb,
+            default_return=(False, "Validation failed")
+        )
+        
+        is_valid, error_msg = validation_result
+        if not is_valid:
+            logger.error(f"Validation failed for {pdf_path}: {error_msg}")
+            self.processing_errors.append({
+                'file': pdf_path,
+                'error': error_msg,
+                'timestamp': datetime.now().isoformat()
+            })
+            return None
+        
+        try:
+            # Parse and validate page ranges
+            page_parser = PageRangeParser()
+            page_selection = page_parser.create_page_selection(page_ranges, pdf_path)
+            
+            logger.info(f"Page selection validated: {page_parser.format_ranges_display(page_selection)}")
+            
+            # Extract metadata
+            metadata = safe_execute(
+                self.extractor.extract_metadata,
+                pdf_path,
+                default_return={'file_name': os.path.basename(pdf_path), 'extraction_date': datetime.now().isoformat()}
+            )
+            
+            # Add page selection info to metadata
+            metadata['page_selection'] = {
+                'ranges': page_ranges,
+                'selected_pages': page_selection.selected_count,
+                'total_pages': page_selection.total_pages,
+                'percentage': page_selection.get_selected_percentage()
+            }
+            
+            # Extract text from selected pages only
+            extraction_result = safe_execute(
+                self.extractor.extract_text_selective,
+                pdf_path, page_selection,
+                default_return=("", {})
+            )
+            
+            full_text, page_texts = extraction_result
+            
+            if not full_text or not safe_execute(self.extractor.validate_extraction, full_text, default_return=False):
+                logger.warning(f"No valid text extracted from selected pages in {pdf_path}")
+                return self._create_empty_document(metadata)
+            
+            # Clean text if configured
+            cleaned_text = safe_execute(
+                clean_text,
+                full_text,
+                default_return=full_text
+            ) if self.config.clean_text else full_text
+            
+            # Chunk text with fallback
+            chunks = safe_execute(
+                self.chunker.chunk_by_sections,
+                cleaned_text, metadata,
+                default_return=[]
+            )
+            
+            if not chunks:
+                chunks = safe_execute(
+                    self.chunker.chunk_by_sentences,
+                    cleaned_text, metadata,
+                    default_return=[]
+                )
+            
+            # Calculate statistics
+            statistics = safe_execute(
+                self._calculate_statistics,
+                cleaned_text, chunks,
+                default_return={
+                    'total_characters': len(cleaned_text),
+                    'total_words': len(cleaned_text.split()),
+                    'total_chunks': len(chunks),
+                    'extraction_success': bool(full_text),
+                    'pages_processed': page_selection.selected_count,
+                    'selective_processing': True
+                }
+            )
+            
+            document_data = {
+                'metadata': metadata,
+                'full_text': full_text,
+                'cleaned_text': cleaned_text,
+                'page_texts': page_texts,
+                'chunks': chunks,
+                'statistics': statistics,
+                'page_selection': {
+                    'ranges': [(start, end) for start, end in page_selection.ranges],
+                    'selected_pages': page_selection.selected_pages,
+                    'original_numbering': page_selection.original_numbering
+                }
+            }
+            
+            # Apply AI validation and article extraction if enabled
+            if self.validation_chain and (self.config.enable_ai_validation or self.config.extract_articles):
+                logger.info(f"Running AI validation and article extraction for selected pages")
+                
+                validated_data = safe_execute(
+                    self.validation_chain.validate_document,
+                    document_data,
+                    default_return=document_data
+                )
+                
+                if validated_data:
+                    document_data = validated_data
+                
+                # Log validation results
+                if 'validation_results' in document_data:
+                    overall_score = document_data['validation_results'].get('document_validation', {}).get('overall_score', 0)
+                    logger.info(f"Document validation score (selective): {overall_score:.1f}/100")
+                    
+                if 'articles' in document_data:
+                    logger.info(f"Extracted {len(document_data['articles'])} articles from selected pages")
+            
+            # Apply quality validation if enabled
+            quality_validation = None
+            if self.quality_validator:
+                logger.info(f"Running quality validation for selective processing")
+                quality_validation = safe_execute(
+                    self.quality_validator.validate_document_processing,
+                    document_data,
+                    default_return=None
+                )
+            
+            if quality_validation:
+                document_data['quality_validation'] = {
+                    'is_valid': quality_validation.is_valid,
+                    'quality_metrics': {
+                        'ocr_confidence': quality_validation.quality_metrics.ocr_confidence,
+                        'text_completeness': quality_validation.quality_metrics.text_completeness,
+                        'structure_coherence': quality_validation.quality_metrics.structure_coherence,
+                        'article_extraction_rate': quality_validation.quality_metrics.article_extraction_rate,
+                        'regulatory_term_accuracy': quality_validation.quality_metrics.regulatory_term_accuracy,
+                        'overall_score': quality_validation.quality_metrics.overall_score,
+                        'status': quality_validation.quality_metrics.status.value,
+                        'timestamp': quality_validation.quality_metrics.timestamp.isoformat()
+                    },
+                    'validation_details': quality_validation.validation_details,
+                    'recommendations': quality_validation.recommendations
+                }
+                
+                # Log quality validation results
+                overall_quality = quality_validation.quality_metrics.overall_score
+                status = quality_validation.quality_metrics.status.value
+                logger.info(f"Quality validation (selective) - Score: {overall_quality:.2f}, Status: {status}")
+            
+            # Record processing metrics
+            processing_time = (datetime.now() - start_time).total_seconds()
+            try:
+                record_processing_session(
+                    session_id=session_id,
+                    file_name=os.path.basename(pdf_path),
+                    processing_result=document_data,
+                    processing_time=processing_time
+                )
+                logger.debug(f"Recorded processing metrics for selective session {session_id}")
+            except Exception as e:
+                logger.warning(f"Failed to record processing metrics: {e}")
+            
+            # Add session metadata to document data
+            document_data['session_info'] = {
+                'session_id': session_id,
+                'processing_time': processing_time,
+                'start_time': start_time.isoformat(),
+                'end_time': datetime.now().isoformat(),
+                'selective_processing': True,
+                'page_ranges': page_ranges
+            }
+            
+            self.processed_documents.append(document_data)
+            logger.info(f"Successfully processed selected pages from {pdf_path}: {statistics['total_chunks']} chunks created")
+            logger.info(f"Pages processed: {page_selection.selected_count}/{page_selection.total_pages} ({page_selection.get_selected_percentage():.1f}%)")
+            logger.info(f"Processing time: {processing_time:.2f} seconds")
+            
+            return document_data
+            
+        except ValueError as e:
+            # Page range parsing errors
+            logger.error(f"Invalid page range specification: {e}")
+            self.processing_errors.append({
+                'file': pdf_path,
+                'error': f"Page range error: {str(e)}",
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            # Try to provide suggestions
+            try:
+                parser = PageRangeParser()
+                total_pages = parser.get_page_count(pdf_path)
+                suggestions = parser.suggest_corrections(page_ranges, total_pages)
+                logger.info(f"Suggestions: {'; '.join(suggestions)}")
+            except:
+                pass
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to process {pdf_path} with selective pages: {str(e)}", exc_info=True)
+            self.processing_errors.append({
+                'file': pdf_path,
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            # Record failed processing metrics
+            processing_time = (datetime.now() - start_time).total_seconds()
+            try:
+                metrics_collector = get_metrics_collector()
+                metrics_collector.record_error(
+                    session_id=session_id,
+                    error_type="selective_processing_error",
+                    error_message=str(e),
+                    function_name="process_document_selective",
+                    stack_trace=str(e.__traceback__) if hasattr(e, '__traceback__') else ""
+                )
+            except Exception as me:
+                logger.warning(f"Failed to record error metrics: {me}")
+            
             return None
     
     def process_directory(self, directory_path: str, recursive: bool = True) -> List[Dict[str, Any]]:
@@ -316,7 +687,36 @@ class RegulatoryDocumentProcessor:
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
         
-        self.client_exporter.export_client_report(
+        self.client_excel_exporter.export_client_report(
+            self.processed_documents,
+            output_path,
+            user_info=user_info
+        )
+        
+        if self.processing_errors:
+            self._export_errors(output_path)
+    
+    def export_cartographie_reglementaire(
+        self,
+        output_path: str,
+        user_info: Optional[Dict[str, str]] = None
+    ):
+        """
+        Export regulatory cartography in synthetic mapping format.
+        
+        Args:
+            output_path: Path for output Excel file
+            user_info: User information (first_name, last_name)
+        """
+        if not self.processed_documents:
+            logger.warning("No documents to export")
+            return
+        
+        output_dir = os.path.dirname(output_path)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+        
+        self.cartographie_exporter.export_cartographie_reglementaire(
             self.processed_documents,
             output_path,
             user_info=user_info
@@ -545,3 +945,158 @@ class RegulatoryDocumentProcessor:
         
         logger.info(f"Performance optimization completed: {len(actions)} actions taken")
         return actions
+    
+    def get_performance_metrics(self, days_back: int = 7) -> Dict[str, Any]:
+        """
+        Get comprehensive performance metrics and analysis.
+        
+        Args:
+            days_back: Number of days to analyze
+            
+        Returns:
+            Dictionary with performance metrics and recommendations
+        """
+        try:
+            metrics_collector = get_metrics_collector()
+            return metrics_collector.get_performance_report(days_back)
+        except Exception as e:
+            logger.error(f"Failed to get performance metrics: {e}")
+            return {
+                'error': str(e),
+                'generated_at': datetime.now().isoformat()
+            }
+    
+    def export_metrics(self, file_path: str, days_back: int = 30):
+        """
+        Export metrics to a file for analysis.
+        
+        Args:
+            file_path: Path to export file
+            days_back: Number of days of data to export
+        """
+        try:
+            metrics_collector = get_metrics_collector()
+            metrics_collector.export_metrics(file_path, days_back)
+            logger.info(f"Metrics exported to {file_path}")
+        except Exception as e:
+            logger.error(f"Failed to export metrics: {e}")
+    
+    def record_user_feedback(self, session_id: str, rating: int, 
+                           comments: str = "", suggestions: str = ""):
+        """
+        Record user feedback for a processing session.
+        
+        Args:
+            session_id: Processing session identifier
+            rating: User rating (1-5)
+            comments: User comments
+            suggestions: User suggestions for improvement
+        """
+        try:
+            metrics_collector = get_metrics_collector()
+            metrics_collector.record_user_feedback(
+                session_id=session_id,
+                feedback_type="general",
+                rating=rating,
+                comments=comments,
+                suggestions=suggestions
+            )
+            logger.info(f"User feedback recorded for session {session_id}: {rating}/5")
+        except Exception as e:
+            logger.error(f"Failed to record user feedback: {e}")
+    
+    def get_system_metrics_summary(self) -> Dict[str, Any]:
+        """
+        Get a summary of system metrics for quick overview.
+        
+        Returns:
+            Dictionary with key system metrics
+        """
+        try:
+            metrics_collector = get_metrics_collector()
+            system_metrics = metrics_collector.get_system_metrics(days_back=7)
+            
+            return {
+                'last_7_days': {
+                    'documents_processed': system_metrics.total_documents,
+                    'success_rate': (system_metrics.successful_processing / 
+                                   max(system_metrics.total_documents, 1)) * 100,
+                    'average_quality_score': system_metrics.average_quality_score * 100,
+                    'average_processing_time': system_metrics.average_processing_time,
+                    'user_satisfaction': system_metrics.user_satisfaction,
+                    'common_issues': len(system_metrics.common_errors)
+                },
+                'trends': {
+                    'quality_trend': system_metrics.quality_trends.get('quality_score_change', 0),
+                    'performance_trend': system_metrics.performance_trends.get('processing_time_change', 0)
+                },
+                'status': 'healthy' if system_metrics.average_quality_score > 0.7 else 'needs_attention',
+                'generated_at': datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Failed to get system metrics summary: {e}")
+            return {
+                'error': str(e),
+                'status': 'unknown',
+                'generated_at': datetime.now().isoformat()
+            }
+    
+    def _extract_articles_basic(self, text: str) -> List[Dict[str, Any]]:
+        """Basic article extraction using regex patterns."""
+        import re
+        articles = []
+        
+        # Common article patterns
+        patterns = [
+            r'Article\s+(\d+(?:[\.,]\d+)?(?:\s*[a-zA-Z])?(?:\s*(?:bis|ter|quater))?)\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!Article\s+\d+)[\s\S]){20,5000})',
+            r'Art\.\s*(\d+)\s*[:.-]?\s*([^\n]{0,200})?\n?((?:(?!Art\.\s*\d+)[\s\S]){20,3000})',
+            r'ARTICLE\s+(\d+(?:[\.,]\d+)?)\s*\n\s*([^\n]{0,200})?\n?((?:(?!ARTICLE\s+\d+)[\s\S]){20,5000})',
+        ]
+        
+        seen_numbers = set()
+        
+        for pattern in patterns:
+            try:
+                matches = re.finditer(pattern, text, re.MULTILINE | re.IGNORECASE)
+                for match in matches:
+                    article_number = match.group(1).strip()
+                    if article_number in seen_numbers:
+                        continue
+                    seen_numbers.add(article_number)
+                    
+                    title = match.group(2).strip() if match.lastindex >= 2 and match.group(2) else ""
+                    content = match.group(3).strip() if match.lastindex >= 3 and match.group(3) else match.group(0)
+                    
+                    # Clean content
+                    content = re.sub(r'\s+', ' ', content).strip()
+                    if len(content) > 50:  # Only include substantial articles
+                        articles.append({
+                            'number': f"Article {article_number}",
+                            'title': title[:200] if title else f"Article {article_number}",
+                            'content': content[:5000],  # Limit content length
+                            'materiality': {'level': 'MEDIUM', 'reasoning': 'Fallback extraction'},
+                            'start_position': match.start(),
+                            'end_position': match.end()
+                        })
+            except Exception as e:
+                logger.warning(f"Pattern extraction failed: {e}")
+                continue
+        
+        # Sort articles by number
+        def get_article_sort_key(article):
+            num_str = article['number'].replace('Article', '').strip()
+            try:
+                # Handle formats like "12", "12.1", "12-1", "12 bis"
+                match = re.match(r'(\d+)(?:[.-](\d+))?', num_str)
+                if match:
+                    main = int(match.group(1))
+                    sub = int(match.group(2)) if match.group(2) else 0
+                    return (main, sub)
+                return (9999, 0)
+            except:
+                return (9999, 0)
+        
+        articles.sort(key=get_article_sort_key)
+        
+        logger.info(f"Basic extraction found {len(articles)} articles")
+        return articles

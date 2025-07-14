@@ -1,0 +1,874 @@
+[
+  {
+    "filename": "cartographie_reglementaire_Doupamby_Nyamat_20250714_104522.xlsx",
+    "size_kb": 30.8623046875,
+    "modified": "2025-07-14T10:59:58.285246",
+    "sheets": [
+      {
+        "name": "Cartographie_Reglementaire",
+        "sheet_id": "1",
+        "r_id": "rId1",
+        "analysis": {
+          "file": "xl/worksheets/sheet1.xml",
+          "rows": 132,
+          "cells": 1116,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "A2",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      }
+    ],
+    "analysis_date": "2025-07-14T11:42:55.166920",
+    "errors": [
+      "Erreur analyse sharedStrings.xml: \"There is no item named 'xl/sharedStrings.xml' in the archive\""
+    ],
+    "styles": {
+      "number_formats": 0,
+      "fonts": 4,
+      "fills": 5
+    }
+  },
+  {
+    "filename": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva.xlsx",
+    "size_kb": 23.2275390625,
+    "modified": "2025-07-11T20:22:46.577606",
+    "sheets": [
+      {
+        "name": "Cartographie_Reglementaire",
+        "sheet_id": "1",
+        "r_id": "rId1",
+        "analysis": {
+          "file": "xl/worksheets/sheet1.xml",
+          "rows": 92,
+          "cells": 774,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "A2",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      }
+    ],
+    "analysis_date": "2025-07-14T11:42:55.176491",
+    "errors": [
+      "Erreur analyse sharedStrings.xml: \"There is no item named 'xl/sharedStrings.xml' in the archive\""
+    ],
+    "styles": {
+      "number_formats": 0,
+      "fonts": 4,
+      "fills": 5
+    }
+  },
+  {
+    "filename": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_173703.xlsx",
+    "size_kb": 13.201171875,
+    "modified": "2025-07-11T17:37:13.819789",
+    "sheets": [
+      {
+        "name": "Document_Metadata",
+        "sheet_id": "1",
+        "r_id": "rId1",
+        "analysis": {
+          "file": "xl/worksheets/sheet1.xml",
+          "rows": 2,
+          "cells": 32,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "J1",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      },
+      {
+        "name": "Data",
+        "sheet_id": "2",
+        "r_id": "rId2",
+        "analysis": {
+          "file": "xl/worksheets/sheet2.xml",
+          "rows": 22,
+          "cells": 286,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "J1",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      },
+      {
+        "name": "Validation_Results",
+        "sheet_id": "3",
+        "r_id": "rId3",
+        "analysis": {
+          "file": "xl/worksheets/sheet3.xml",
+          "rows": 2,
+          "cells": 22,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "J1",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      },
+      {
+        "name": "Statistics",
+        "sheet_id": "4",
+        "r_id": "rId4",
+        "analysis": {
+          "file": "xl/worksheets/sheet4.xml",
+          "rows": 9,
+          "cells": 18,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "A2",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B2",
+              "type": "n",
+              "value": "1"
+            },
+            {
+              "ref": "A3",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B3",
+              "type": "n",
+              "value": "1"
+            },
+            {
+              "ref": "A4",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B4",
+              "type": "n",
+              "value": "0"
+            },
+            {
+              "ref": "A5",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B5",
+              "type": "n",
+              "value": "1278"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Summary",
+        "sheet_id": "5",
+        "r_id": "rId5",
+        "analysis": {
+          "file": "xl/worksheets/sheet5.xml",
+          "rows": 2,
+          "cells": 20,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "J1",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      }
+    ],
+    "analysis_date": "2025-07-14T11:42:55.183524",
+    "errors": [
+      "Erreur analyse sharedStrings.xml: \"There is no item named 'xl/sharedStrings.xml' in the archive\""
+    ],
+    "styles": {
+      "number_formats": 0,
+      "fonts": 4,
+      "fills": 5
+    }
+  },
+  {
+    "filename": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_174036.xlsx",
+    "size_kb": 6.4423828125,
+    "modified": "2025-07-11T17:40:46.974657",
+    "sheets": [
+      {
+        "name": "Cartographie_Reglementaire",
+        "sheet_id": "1",
+        "r_id": "rId1",
+        "analysis": {
+          "file": "xl/worksheets/sheet1.xml",
+          "rows": 27,
+          "cells": 243,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "A2",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      }
+    ],
+    "analysis_date": "2025-07-14T11:42:55.189525",
+    "errors": [
+      "Erreur analyse sharedStrings.xml: \"There is no item named 'xl/sharedStrings.xml' in the archive\""
+    ],
+    "styles": {
+      "number_formats": 0,
+      "fonts": 2,
+      "fills": 3
+    }
+  },
+  {
+    "filename": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250713_221844.xlsx",
+    "size_kb": 23.3681640625,
+    "modified": "2025-07-13T22:28:44.987128",
+    "sheets": [
+      {
+        "name": "Cartographie_Reglementaire",
+        "sheet_id": "1",
+        "r_id": "rId1",
+        "analysis": {
+          "file": "xl/worksheets/sheet1.xml",
+          "rows": 92,
+          "cells": 774,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "A2",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      }
+    ],
+    "analysis_date": "2025-07-14T11:42:55.194333",
+    "errors": [
+      "Erreur analyse sharedStrings.xml: \"There is no item named 'xl/sharedStrings.xml' in the archive\""
+    ],
+    "styles": {
+      "number_formats": 0,
+      "fonts": 4,
+      "fills": 5
+    }
+  },
+  {
+    "filename": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250714_095714.xlsx",
+    "size_kb": 31.0830078125,
+    "modified": "2025-07-14T10:13:56.443020",
+    "sheets": [
+      {
+        "name": "Cartographie_Reglementaire",
+        "sheet_id": "1",
+        "r_id": "rId1",
+        "analysis": {
+          "file": "xl/worksheets/sheet1.xml",
+          "rows": 126,
+          "cells": 1080,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "A2",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      }
+    ],
+    "analysis_date": "2025-07-14T11:42:55.201194",
+    "errors": [
+      "Erreur analyse sharedStrings.xml: \"There is no item named 'xl/sharedStrings.xml' in the archive\""
+    ],
+    "styles": {
+      "number_formats": 0,
+      "fonts": 4,
+      "fills": 5
+    }
+  },
+  {
+    "filename": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_191639.xlsx",
+    "size_kb": 11.4560546875,
+    "modified": "2025-07-11T19:25:22.597867",
+    "sheets": [
+      {
+        "name": "Cartographie_Reglementaire",
+        "sheet_id": "1",
+        "r_id": "rId1",
+        "analysis": {
+          "file": "xl/worksheets/sheet1.xml",
+          "rows": 92,
+          "cells": 774,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "A2",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      }
+    ],
+    "analysis_date": "2025-07-14T11:42:55.208013",
+    "errors": [
+      "Erreur analyse sharedStrings.xml: \"There is no item named 'xl/sharedStrings.xml' in the archive\""
+    ],
+    "styles": {
+      "number_formats": 0,
+      "fonts": 4,
+      "fills": 5
+    }
+  },
+  {
+    "filename": "cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_194758.xlsx",
+    "size_kb": 11.4140625,
+    "modified": "2025-07-11T19:56:40.309877",
+    "sheets": [
+      {
+        "name": "Cartographie_Reglementaire",
+        "sheet_id": "1",
+        "r_id": "rId1",
+        "analysis": {
+          "file": "xl/worksheets/sheet1.xml",
+          "rows": 92,
+          "cells": 774,
+          "sample_cells": [
+            {
+              "ref": "A1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "B1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "C1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "D1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "E1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "F1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "G1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "H1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "I1",
+              "type": "inlineStr",
+              "value": ""
+            },
+            {
+              "ref": "A2",
+              "type": "inlineStr",
+              "value": ""
+            }
+          ]
+        }
+      }
+    ],
+    "analysis_date": "2025-07-14T11:42:55.213180",
+    "errors": [
+      "Erreur analyse sharedStrings.xml: \"There is no item named 'xl/sharedStrings.xml' in the archive\""
+    ],
+    "styles": {
+      "number_formats": 0,
+      "fonts": 4,
+      "fills": 5
+    }
+  }
+]

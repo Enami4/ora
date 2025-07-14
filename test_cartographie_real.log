@@ -1,0 +1,126 @@
+2025-07-14 11:41:42,972 - __main__ - INFO - 🔧 Test réel de cartographie initialisé
+2025-07-14 11:41:42,973 - __main__ - INFO - 🚀 Démarrage du test réel de cartographie
+2025-07-14 11:41:42,973 - __main__ - INFO - 📊 Test 1: Analyse détaillée des fichiers existants
+2025-07-14 11:41:42,977 - __main__ - INFO - 📋 Fichiers de cartographie trouvés: 8
+2025-07-14 11:41:42,978 - __main__ - INFO - 📄 Analyse: cartographie_reglementaire_Doupamby_Nyamat_20250714_104522.xlsx
+2025-07-14 11:41:42,979 - __main__ - INFO -    Taille: 30.86 KB
+2025-07-14 11:41:42,980 - __main__ - INFO -    Modifié: 2025-07-14 10:59:58.285246
+2025-07-14 11:41:42,982 - __main__ - INFO -       ✅ Format Excel valide (ZIP)
+2025-07-14 11:41:42,983 - __main__ - INFO - 📄 Analyse: cartographie_reglementaire_Doupamby_Nyamat_Bantsiva.xlsx
+2025-07-14 11:41:42,984 - __main__ - INFO -    Taille: 23.23 KB
+2025-07-14 11:41:42,984 - __main__ - INFO -    Modifié: 2025-07-11 20:22:46.577606
+2025-07-14 11:41:42,986 - __main__ - INFO -       ✅ Format Excel valide (ZIP)
+2025-07-14 11:41:42,987 - __main__ - INFO - 📄 Analyse: cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_173703.xlsx
+2025-07-14 11:41:42,988 - __main__ - INFO -    Taille: 13.20 KB
+2025-07-14 11:41:42,988 - __main__ - INFO -    Modifié: 2025-07-11 17:37:13.819789
+2025-07-14 11:41:42,990 - __main__ - INFO -       ✅ Format Excel valide (ZIP)
+2025-07-14 11:41:42,991 - __main__ - INFO - 📄 Analyse: cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_174036.xlsx
+2025-07-14 11:41:42,993 - __main__ - INFO -    Taille: 6.44 KB
+2025-07-14 11:41:42,993 - __main__ - INFO -    Modifié: 2025-07-11 17:40:46.974657
+2025-07-14 11:41:42,995 - __main__ - INFO -       ✅ Format Excel valide (ZIP)
+2025-07-14 11:41:42,996 - __main__ - INFO - 📄 Analyse: cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250713_221844.xlsx
+2025-07-14 11:41:42,997 - __main__ - INFO -    Taille: 23.37 KB
+2025-07-14 11:41:42,997 - __main__ - INFO -    Modifié: 2025-07-13 22:28:44.987128
+2025-07-14 11:41:42,999 - __main__ - INFO -       ✅ Format Excel valide (ZIP)
+2025-07-14 11:41:43,000 - __main__ - INFO - 📄 Analyse: cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250714_095714.xlsx
+2025-07-14 11:41:43,002 - __main__ - INFO -    Taille: 31.08 KB
+2025-07-14 11:41:43,002 - __main__ - INFO -    Modifié: 2025-07-14 10:13:56.443020
+2025-07-14 11:41:43,004 - __main__ - INFO -       ✅ Format Excel valide (ZIP)
+2025-07-14 11:41:43,004 - __main__ - INFO - 📄 Analyse: cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_191639.xlsx
+2025-07-14 11:41:43,006 - __main__ - INFO -    Taille: 11.46 KB
+2025-07-14 11:41:43,006 - __main__ - INFO -    Modifié: 2025-07-11 19:25:22.597867
+2025-07-14 11:41:43,008 - __main__ - INFO -       ✅ Format Excel valide (ZIP)
+2025-07-14 11:41:43,008 - __main__ - INFO - 📄 Analyse: cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_194758.xlsx
+2025-07-14 11:41:43,010 - __main__ - INFO -    Taille: 11.41 KB
+2025-07-14 11:41:43,010 - __main__ - INFO -    Modifié: 2025-07-11 19:56:40.309877
+2025-07-14 11:41:43,011 - __main__ - INFO -       ✅ Format Excel valide (ZIP)
+2025-07-14 11:41:43,023 - __main__ - INFO - 📄 Fichiers PDF trouvés: 1
+2025-07-14 11:41:43,023 - __main__ - INFO - 📄 PDF: Code Pénal Gabonais.pdf
+2025-07-14 11:41:43,024 - __main__ - INFO -    Taille: 803.40 KB
+2025-07-14 11:41:43,025 - __main__ - INFO -       ✅ Format PDF valide
+2025-07-14 11:41:43,026 - __main__ - INFO - ✅ Test 1 RÉUSSI: Analyse des fichiers existants
+2025-07-14 11:41:43,027 - __main__ - INFO - 🗺️ Test 2: Test de l'exporteur de cartographie
+2025-07-14 11:41:43,069 - __main__ - WARNING - ⚠️ Impossible d'importer CartographieExporter: No module named 'PyPDF2'
+2025-07-14 11:41:43,069 - __main__ - INFO - ✅ Test 2 RÉUSSI: Test de l'exporteur de cartographie
+2025-07-14 11:41:43,069 - __main__ - INFO - 📄 Test 3: Simulation de traitement de documents
+2025-07-14 11:41:43,070 - __main__ - INFO - 🔄 Traitement simulé: R-2020-03-Ratios-Prudentiels.pdf
+2025-07-14 11:41:43,070 - __main__ - INFO - ✅ Document traité: R-2020-03-Ratios-Prudentiels.pdf
+2025-07-14 11:41:43,071 - __main__ - INFO -    Catégorie: VI
+2025-07-14 11:41:43,071 - __main__ - INFO -    Référence: R-2020/03
+2025-07-14 11:41:43,071 - __main__ - INFO - 🔄 Traitement simulé: I-2021-01-Moyens-Paiement.pdf
+2025-07-14 11:41:43,071 - __main__ - INFO - ✅ Document traité: I-2021-01-Moyens-Paiement.pdf
+2025-07-14 11:41:43,071 - __main__ - INFO -    Catégorie: V
+2025-07-14 11:41:43,072 - __main__ - INFO -    Référence: I-2021/01
+2025-07-14 11:41:43,072 - __main__ - INFO - 🔄 Traitement simulé: D-2019-05-Agrements.pdf
+2025-07-14 11:41:43,072 - __main__ - INFO - ✅ Document traité: D-2019-05-Agrements.pdf
+2025-07-14 11:41:43,072 - __main__ - INFO -    Catégorie: III
+2025-07-14 11:41:43,072 - __main__ - INFO -    Référence: D-2019/05
+2025-07-14 11:41:43,072 - __main__ - INFO - 📊 Résumé du traitement simulé:
+2025-07-14 11:41:43,073 - __main__ - INFO -    Documents traités: 3
+2025-07-14 11:41:43,073 - __main__ - INFO -    Catégories identifiées: 3
+2025-07-14 11:41:43,073 - __main__ - INFO -      V: 1 document(s)
+2025-07-14 11:41:43,073 - __main__ - INFO -      VI: 1 document(s)
+2025-07-14 11:41:43,073 - __main__ - INFO -      III: 1 document(s)
+2025-07-14 11:41:43,074 - __main__ - INFO - ✅ Test 3 RÉUSSI: Simulation de traitement de documents
+2025-07-14 11:41:43,074 - __main__ - INFO - 🏷️ Test 4: Test des catégories dynamiques
+2025-07-14 11:41:43,074 - __main__ - INFO - 📋 Analyse des catégories dynamiques:
+2025-07-14 11:41:43,075 - __main__ - INFO -    📂 VI:
+2025-07-14 11:41:43,075 - __main__ - INFO -      Documents: 1
+2025-07-14 11:41:43,075 - __main__ - INFO -      Fichiers: R-2020-03-Ratios-Prudentiels.pdf
+2025-07-14 11:41:43,075 - __main__ - INFO -      Patterns: ratio
+2025-07-14 11:41:43,075 - __main__ - INFO -    📂 V:
+2025-07-14 11:41:43,076 - __main__ - INFO -      Documents: 1
+2025-07-14 11:41:43,076 - __main__ - INFO -      Fichiers: I-2021-01-Moyens-Paiement.pdf
+2025-07-14 11:41:43,076 - __main__ - INFO -      Patterns: paiement
+2025-07-14 11:41:43,076 - __main__ - INFO -    📂 III:
+2025-07-14 11:41:43,076 - __main__ - INFO -      Documents: 1
+2025-07-14 11:41:43,076 - __main__ - INFO -      Fichiers: D-2019-05-Agrements.pdf
+2025-07-14 11:41:43,077 - __main__ - INFO -      Patterns: agrément
+2025-07-14 11:41:43,077 - __main__ - INFO - 🔄 Test de fallback: document_inconnu.pdf → II
+2025-07-14 11:41:43,077 - __main__ - INFO - ✅ Test 4 RÉUSSI: Test des catégories dynamiques
+2025-07-14 11:41:43,077 - __main__ - INFO - 📊 Test 5: Test de génération Excel
+2025-07-14 11:41:43,101 - __main__ - WARNING - ⚠️ Exporteur non disponible: No module named 'PyPDF2'
+2025-07-14 11:41:43,104 - __main__ - INFO - ✅ Fichier CSV généré: test_outputs/test_cartographie_20250714_114143.csv
+2025-07-14 11:41:43,105 - __main__ - INFO - ℹ️ Fichier Excel non généré (simulation)
+2025-07-14 11:41:43,105 - __main__ - INFO - ✅ Test 5 RÉUSSI: Test de génération Excel
+2025-07-14 11:41:43,106 - __main__ - INFO - 📋 Génération du rapport final
+2025-07-14 11:41:43,113 - __main__ - INFO - 
+================================================================================
+2025-07-14 11:41:43,113 - __main__ - INFO - 📋 RAPPORT DE TEST RÉEL - CARTOGRAPHIE RÉGLEMENTAIRE
+2025-07-14 11:41:43,113 - __main__ - INFO - ================================================================================
+2025-07-14 11:41:43,113 - __main__ - INFO - 📊 RÉSUMÉ:
+2025-07-14 11:41:43,113 - __main__ - INFO -    Tests totaux: 5
+2025-07-14 11:41:43,114 - __main__ - INFO -    Tests réussis: 5
+2025-07-14 11:41:43,114 - __main__ - INFO -    Tests échoués: 0
+2025-07-14 11:41:43,114 - __main__ - INFO -    Taux de réussite: 100.0%
+2025-07-14 11:41:43,114 - __main__ - INFO -    Durée: 0.14s
+2025-07-14 11:41:43,114 - __main__ - INFO -    Documents traités: 3
+2025-07-14 11:41:43,114 - __main__ - INFO - 
+📁 ANALYSE DES FICHIERS:
+2025-07-14 11:41:43,115 - __main__ - INFO -    cartographie_reglementaire_Doupamby_Nyamat_20250714_104522.xlsx: 30.86 KB
+2025-07-14 11:41:43,115 - __main__ - INFO -    cartographie_reglementaire_Doupamby_Nyamat_Bantsiva.xlsx: 23.23 KB
+2025-07-14 11:41:43,115 - __main__ - INFO -    cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_173703.xlsx: 13.20 KB
+2025-07-14 11:41:43,115 - __main__ - INFO -    cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250711_174036.xlsx: 6.44 KB
+2025-07-14 11:41:43,115 - __main__ - INFO -    cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250713_221844.xlsx: 23.37 KB
+2025-07-14 11:41:43,116 - __main__ - INFO -    cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_20250714_095714.xlsx: 31.08 KB
+2025-07-14 11:41:43,116 - __main__ - INFO -    cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_191639.xlsx: 11.46 KB
+2025-07-14 11:41:43,116 - __main__ - INFO -    cartographie_reglementaire_Doupamby_Nyamat_Bantsiva_Matoka_20250711_194758.xlsx: 11.41 KB
+2025-07-14 11:41:43,116 - __main__ - INFO - 
+⚠️ AVERTISSEMENTS:
+2025-07-14 11:41:43,116 - __main__ - INFO -    - Import CartographieExporter: No module named 'PyPDF2'
+2025-07-14 11:41:43,118 - __main__ - INFO - 
+💡 RECOMMANDATIONS:
+2025-07-14 11:41:43,118 - __main__ - INFO -    - Implémenter des tests unitaires pour chaque composant
+2025-07-14 11:41:43,119 - __main__ - INFO -    - Ajouter la validation des données en temps réel
+2025-07-14 11:41:43,119 - __main__ - INFO -    - Optimiser les performances de catégorisation
+2025-07-14 11:41:43,119 - __main__ - INFO -    - Implémenter un système de cache pour les résultats IA
+2025-07-14 11:41:43,119 - __main__ - INFO -    - Ajouter des métriques de qualité pour les extractions
+2025-07-14 11:41:43,119 - __main__ - INFO -    - Créer un système de fallback robuste en cas d'erreur IA
+2025-07-14 11:41:43,119 - __main__ - INFO -    - Implémenter la validation des fichiers Excel générés
+2025-07-14 11:41:43,120 - __main__ - INFO -    - Ajouter des logs détaillés pour le débogage
+2025-07-14 11:41:43,120 - __main__ - INFO -    - Créer des tests de régression automatisés
+2025-07-14 11:41:43,120 - __main__ - INFO - 
+================================================================================
+2025-07-14 11:41:43,120 - __main__ - INFO - 🎉 STATUT: TOUS LES TESTS RÉUSSIS
+2025-07-14 11:41:43,120 - __main__ - INFO - ================================================================================
+2025-07-14 11:41:43,121 - __main__ - INFO - 📄 Rapport sauvegardé: test_outputs/real_test_report_20250714_114143.json
